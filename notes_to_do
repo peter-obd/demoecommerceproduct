@@ -1,0 +1,3 @@
+What to work on:
+-- Make sure the keyboard does not make an overflow when the user tries to enter his info on both login and signup screen.
+-- Make sure the user can close the keyboard by tapping outside the keyboard on the screen on every field.

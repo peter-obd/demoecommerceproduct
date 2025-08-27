@@ -1,0 +1,295 @@
+import 'dart:convert';
+
+import 'package:demoecommerceproduct/models/category_model.dart';
+import 'package:demoecommerceproduct/models/product/product_data_model.dart';
+import 'package:demoecommerceproduct/models/product/product_model.dart';
+import 'package:demoecommerceproduct/models/user.dart';
+import 'package:demoecommerceproduct/networking/app_request_manager.dart';
+import 'package:demoecommerceproduct/networking/request_manager.dart';
+import 'package:demoecommerceproduct/services/isar_service.dart';
+import 'package:demoecommerceproduct/services/user_service.dart';
+import 'package:flutter/material.dart';
+
+typedef CategoriesSuccess = Function(List<Category> serviceDirectoryModel);
+typedef ProductDataSuccess = Function(ProductData productData);
+typedef ProductSuccess = Function(List<ProductItem> productData);
+typedef UserSuccess = Function(User user);
+typedef addFavoriteProductSuccess = Function(bool success);
+
+class ApisService {
+  static const String _baseUrl = "https://onedollarapp.onrender.com/";
+  static const String _urlPath = "api/";
+
+  static void getAllCategories(CategoriesSuccess success, RequestFail fail) {
+    var urlMethod = "Category/get-all";
+    var url = _baseUrl + _urlPath + urlMethod;
+    AppRequestManager.getWithToken(url, null, null, true, (response) async {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        List data = result['data'];
+        List<Category> categories = [];
+        for (var category in data) {
+          categories.add(Category.fromJson(category));
+        }
+        await IsarService.instance.saveMultipleCategories(categories);
+
+        success(categories);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void signup(
+      String phone, String password, RequestSuccess success, RequestFail fail) {
+    var urlMethod = "Auth/signup";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {
+      "phone": phone,
+      "password": password,
+    };
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        String successData = result['data'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void verifyUser(
+      String phone, String otpCode, RequestSuccess success, RequestFail fail) {
+    var urlMethod = "Auth/verify-otp";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {
+      "phone": phone,
+      "otpCode": otpCode,
+    };
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        String successData = result['data'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void resendOtp(
+      String phone, RequestSuccess success, RequestFail fail) {
+    var urlMethod = "Auth/resend-otp";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {"phoneNumber": phone}; // pob rja3la t2akad
+
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        String successData = result['data'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void resendPasswordResetOtp(
+      String phone, RequestSuccess success, RequestFail fail) {
+    var urlMethod = "Auth/resend-password-reset-otp";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {"phoneNumber": phone}; // pob rja3la t2akad
+
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        String successData = result['data'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void forgotPassword(
+      String phone, RequestSuccess success, RequestFail fail) {
+    var urlMethod = "Auth/forgot-password";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {"phone": phone};
+
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        String successData = result['data'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void resetPassword(String phone, String otp, String password,
+      RequestSuccess success, RequestFail fail) {
+    var urlMethod = "Auth/reset-password";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {"phone": phone, "otpCode": otp, "newPassword": password};
+
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        String successData = result['data'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void loginUser(
+      String phone, String password, UserSuccess success, RequestFail fail) {
+    var urlMethod = "Auth/login";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {"phone": phone, "password": password};
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        User user = User.fromJson(result['data']);
+        IsarService.instance.saveUser(user);
+        success(user);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void getProductByCategoryId(
+      String categoryId,
+      String pageSize,
+      bool adding,
+      String pageNumebr,
+      ProductDataSuccess success,
+      RequestFail fail) {
+    var urlMethod =
+        "Product/get-by-category-id-with-details-paginated/$categoryId/$pageSize/$pageNumebr";
+    var url = _baseUrl + _urlPath + urlMethod;
+
+    AppRequestManager.getWithToken(url, null, null, true, (response) async {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+
+        ProductData productData = ProductData.fromJson(result['data']);
+        // if (!adding) {
+        await IsarService.instance
+            .saveMultipleProductsUpsert(productData.items);
+        // }
+
+        success(productData);
+      } catch (e) {
+        debugPrint("Could not parse  : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void getForYouByUserId(String userId, String pageSize,
+      String pageNumebr, ProductDataSuccess success, RequestFail fail) {
+    var urlMethod = "Product/products-for-you/$userId/$pageNumebr/$pageSize";
+    var url = _baseUrl + _urlPath + urlMethod;
+
+    AppRequestManager.getWithToken(url, null, null, true, (response) async {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+
+        ProductData productData = ProductData.fromJson(result['data']);
+
+        success(productData);
+      } catch (e) {
+        debugPrint("Could not parse  : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void getAllProducts(ProductSuccess success, RequestFail fail) {
+    var urlMethod = "Product/get-all";
+    var url = _baseUrl + _urlPath + urlMethod;
+
+    AppRequestManager.getWithToken(url, null, null, true, (response) async {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        var items = result['data'];
+        List<ProductItem> products = [];
+        for (var product in items) {
+          products.add(ProductItem.fromJson(product));
+        }
+
+        await IsarService.instance.saveMultipleProducts(products);
+
+        success(products);
+      } catch (e) {
+        debugPrint("Could not parse  : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void addToFavorites(String productId, String userId,
+      addFavoriteProductSuccess success, RequestFail fail) {
+    var urlMethod = "Favorite/insert";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {
+      "productId": productId,
+      "userId": userId,
+    };
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        bool successData = result['success'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse Favorite Product: ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void searchProduct(
+      String searchText, ProductSuccess success, RequestFail fail) {
+    var urlMethod = "Product/product-search";
+    var url = _baseUrl + _urlPath + urlMethod;
+
+    var params = {"searchText": searchText};
+
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+
+        List data = result['data'];
+        List<ProductItem> products = [];
+        for (var product in data) {
+          products.add(ProductItem.fromJson(product));
+        }
+        success(products);
+      } catch (e) {
+        debugPrint("Could not parse Searched Product: ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+}
+// {
+//   "searchText": "string",
+//   "code": "string",
+//   "categoryId": "string",
+//   "brandId": "string",
+//   "currency": "string",
+//   "minPrice": 0,
+//   "maxPrice": 0,
+//   "attributes": [
+//     {
+//       "basicDataCategoryName": "string",
+//       "isProductVariant": true,
+//       "values": [
+//         "string"
+//       ]
+//     }
+//   ],
+//   "page": 0,
+//   "pageSize": 0
+// }
