@@ -33,7 +33,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         title: "Edit\nProfile",
                       )),
                   Expanded(
-                      flex: 4,
+                      flex: 6,
                       child: Container(
                           width: double.infinity,
                           decoration: const BoxDecoration(

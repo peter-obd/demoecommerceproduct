@@ -1,5 +1,6 @@
 import 'package:demoecommerceproduct/controllers/profile_controller.dart';
 import 'package:demoecommerceproduct/screens/edit_profile_screen.dart';
+import 'package:demoecommerceproduct/screens/help_support_screen.dart';
 import 'package:demoecommerceproduct/screens/oders_screen.dart';
 import 'package:demoecommerceproduct/values/colors.dart';
 import 'package:demoecommerceproduct/values/constants.dart';
@@ -16,74 +17,471 @@ class MyProfileScreen extends StatelessWidget {
     var responsive = Responsive(context);
     return Scaffold(
       backgroundColor: AppColors.greyBackground,
-      appBar: AppBar(
-        backgroundColor: AppColors.greyBackground,
+      body: Column(
+        children: [
+          // Enhanced Header
+          _buildEnhancedHeader(responsive),
+
+          // Enhanced Profile Content
+          Expanded(
+            child: _buildEnhancedProfileContent(responsive, controller),
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
+    );
+  }
+
+  Widget _buildEnhancedHeader(Responsive responsive) {
+    return Container(
+      height: responsive.hp(120),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary,
+            AppColors.primary.withOpacity(0.8),
+          ],
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: responsive.wp(30)),
-          child: Column(
+          padding: EdgeInsets.symmetric(horizontal: responsive.wp(20)),
+          child: Row(
             children: [
-              // Profile Card
+              // Back Button (if needed)
               Container(
-                padding: EdgeInsets.all(responsive.wp(10)),
+                padding: EdgeInsets.all(responsive.wp(12)),
                 decoration: BoxDecoration(
-                  color: AppColors.secondary,
-                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(15),
                 ),
+                child: Icon(
+                  Icons.person_rounded,
+                  color: Colors.white,
+                  size: responsive.sp(45),
+                ),
+              ),
+              SizedBox(width: responsive.wp(15)),
+
+              // Profile Title
+              Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundColor: AppColors.greyBackground,
-                      child: Center(
-                          child: Image.asset(
-                        "assets/icons/Profile.png",
-                        height: responsive.hp(30),
-                        width: responsive.wp(70),
-                      )),
-                    ),
-                    SizedBox(height: responsive.hp(7)),
                     Text(
-                      "Rosina Doe",
+                      'My Profile',
                       style: AppTextStyle.textStyle(
-                          20, AppColors.blackText, FontWeight.w600),
+                        responsive.sp(50),
+                        Colors.white,
+                        FontWeight.w800,
+                      ),
                     ),
-                    SizedBox(height: responsive.hp(7)),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Image.asset("assets/icons/Location.png",
-                            height: responsive.hp(20),
-                            width: responsive.wp(20)),
-                        const SizedBox(width: 4),
-                        Flexible(
-                            child: Obx(
-                          () => Text(
-                              controller.location?.address ??
-                                  "no chosen address yet!",
-                              textAlign: TextAlign.center,
-                              style: AppTextStyle.textStyle(responsive.sp(25),
-                                  AppColors.blackText, FontWeight.w400)),
-                        )),
-                      ],
+                    Text(
+                      'Manage your account settings',
+                      style: AppTextStyle.textStyle(
+                        responsive.sp(32),
+                        Colors.white.withOpacity(0.9),
+                        FontWeight.w400,
+                      ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: responsive.hp(30)),
-
-              // List Items
-              buildListTile("Edit Profile", responsive, onTap: () {
-                Get.to(EditProfileScreen());
-              }),
-              buildListTile("Shopping address", responsive, onTap: () {
-                controller.pickLocation(context);
-              }),
-              buildListTile("Order history", responsive, onTap: () {
-                Get.to(OdersScreen());
-              }),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEnhancedProfileContent(
+      Responsive responsive, ProfileController controller) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Padding(
+        padding: EdgeInsets.all(responsive.wp(20)),
+        child: Column(
+          children: [
+            SizedBox(height: responsive.hp(20)),
+
+            // Enhanced Profile Card
+            _buildEnhancedProfileCard(responsive, controller),
+
+            SizedBox(height: responsive.hp(30)),
+
+            // Enhanced Menu Items
+            _buildEnhancedMenuItem(
+              'Edit Profile',
+              'Update your personal information',
+              Icons.edit_rounded,
+              responsive,
+              onTap: () => Get.to(const EditProfileScreen()),
+            ),
+
+            _buildEnhancedMenuItem(
+              'Shopping Address',
+              'Manage your delivery addresses',
+              Icons.location_on_rounded,
+              responsive,
+              onTap: () => controller.pickLocation(Get.context!),
+            ),
+
+            _buildEnhancedMenuItem(
+              'Order History',
+              'View your past orders and purchases',
+              Icons.history_rounded,
+              responsive,
+              onTap: () => Get.to(const OdersScreen()),
+            ),
+
+            // _buildEnhancedMenuItem(
+            //   'Notifications',
+            //   'Manage your notification preferences',
+            //   Icons.notifications_rounded,
+            //   responsive,
+            //   onTap: () {
+            //     // Handle notifications
+            //   },
+            // ),
+
+            _buildEnhancedMenuItem(
+              'Help & Support',
+              'Get help or contact customer support',
+              Icons.help_rounded,
+              responsive,
+              onTap: () => Get.to(const HelpSupportScreen()),
+            ),
+
+            _buildEnhancedMenuItem(
+              'Logout',
+              'Sign out of your account',
+              Icons.logout_rounded,
+              responsive,
+              isDestructive: true,
+              onTap: () {
+                // Handle logout
+                controller.logoutUser();
+              },
+            ),
+
+            SizedBox(height: responsive.hp(40)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEnhancedProfileCard(
+      Responsive responsive, ProfileController controller) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: responsive.wp(10)),
+      padding: EdgeInsets.all(responsive.wp(25)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.1),
+            blurRadius: 25,
+            offset: const Offset(0, 10),
+            spreadRadius: 3,
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Enhanced Avatar Section
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: responsive.wp(120),
+                height: responsive.wp(120),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primary.withOpacity(0.2),
+                      AppColors.lightBlue.withOpacity(0.2),
+                    ],
+                  ),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              Container(
+                width: responsive.wp(110),
+                height: responsive.wp(110),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.2),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: Container(
+                    padding: EdgeInsets.all(responsive.wp(20)),
+                    child: Image.asset(
+                      "assets/icons/Profile.png",
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+              // Edit Button
+              // Positioned(
+              //   bottom: 0,
+              //   right: 0,
+              //   child: Container(
+              //     padding: EdgeInsets.all(responsive.wp(8)),
+              //     decoration: BoxDecoration(
+              //       color: AppColors.primary,
+              //       shape: BoxShape.circle,
+              //       boxShadow: [
+              //         BoxShadow(
+              //           color: AppColors.primary.withOpacity(0.3),
+              //           blurRadius: 10,
+              //           offset: const Offset(0, 3),
+              //         ),
+              //       ],
+              //     ),
+              //     child: Icon(
+              //       Icons.camera_alt_rounded,
+              //       color: Colors.white,
+              //       size: responsive.sp(35),
+              //     ),
+              //   ),
+              // ),
+            ],
+          ),
+
+          SizedBox(height: responsive.hp(20)),
+
+          // Enhanced User Info
+          Text(
+            controller.user?.name ?? "Unkown",
+            style: AppTextStyle.textStyle(
+              responsive.sp(50),
+              AppColors.blackText,
+              FontWeight.w700,
+            ),
+          ),
+
+          SizedBox(height: responsive.hp(8)),
+
+          // Container(
+          //   padding: EdgeInsets.symmetric(
+          //     horizontal: responsive.wp(15),
+          //     vertical: responsive.hp(6),
+          //   ),
+          //   decoration: BoxDecoration(
+          //     color: AppColors.primary.withOpacity(0.1),
+          //     borderRadius: BorderRadius.circular(20),
+          //   ),
+          //   child: Text(
+          //     "Premium Member",
+          //     style: AppTextStyle.textStyle(
+          //       responsive.sp(30),
+          //       AppColors.primary,
+          //       FontWeight.w600,
+          //     ),
+          //   ),
+          // ),
+
+          // SizedBox(height: responsive.hp(15)),
+
+          // Enhanced Location Section
+          GestureDetector(
+            onTap: () {
+              controller.pickLocation(Get.context!);
+            },
+            child: Container(
+              padding: EdgeInsets.all(responsive.wp(15)),
+              decoration: BoxDecoration(
+                color: AppColors.greyBackground.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                  color: AppColors.primary.withOpacity(0.1),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(responsive.wp(8)),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      Icons.location_on_rounded,
+                      color: AppColors.primary,
+                      size: responsive.sp(35),
+                    ),
+                  ),
+                  SizedBox(width: responsive.wp(15)),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Current Location",
+                          style: AppTextStyle.textStyle(
+                            responsive.sp(28),
+                            AppColors.greyText,
+                            FontWeight.w500,
+                          ),
+                        ),
+                        Obx(
+                          () => Text(
+                            controller.location?.address ??
+                                "No address chosen yet",
+                            style: AppTextStyle.textStyle(
+                              responsive.sp(32),
+                              AppColors.blackText,
+                              FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: AppColors.greyText,
+                    size: responsive.sp(30),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnhancedMenuItem(
+    String title,
+    String subtitle,
+    IconData icon,
+    Responsive responsive, {
+    VoidCallback? onTap,
+    bool isDestructive = false,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(bottom: responsive.hp(15)),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: EdgeInsets.all(responsive.wp(20)),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isDestructive
+                    ? Colors.red.withOpacity(0.2)
+                    : AppColors.primary.withOpacity(0.1),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isDestructive
+                      ? Colors.red.withOpacity(0.05)
+                      : AppColors.primary.withOpacity(0.05),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                  spreadRadius: 1,
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(responsive.wp(12)),
+                  decoration: BoxDecoration(
+                    color: isDestructive
+                        ? Colors.red.withOpacity(0.1)
+                        : AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: isDestructive ? Colors.red : AppColors.primary,
+                    size: responsive.sp(45),
+                  ),
+                ),
+                SizedBox(width: responsive.wp(15)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: AppTextStyle.textStyle(
+                          responsive.sp(40),
+                          isDestructive ? Colors.red : AppColors.blackText,
+                          FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(height: responsive.hp(3)),
+                      Text(
+                        subtitle,
+                        style: AppTextStyle.textStyle(
+                          responsive.sp(30),
+                          AppColors.greyText,
+                          FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.all(responsive.wp(5)),
+                  decoration: BoxDecoration(
+                    color: isDestructive
+                        ? Colors.red.withOpacity(0.1)
+                        : AppColors.greyBackground.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: isDestructive ? Colors.red : AppColors.greyText,
+                    size: responsive.sp(30),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

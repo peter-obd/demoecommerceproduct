@@ -2,7 +2,9 @@ import 'package:demoecommerceproduct/models/category_model.dart';
 import 'package:demoecommerceproduct/models/product/product_data_model.dart';
 import 'package:demoecommerceproduct/models/product/product_model.dart';
 import 'package:demoecommerceproduct/models/product_model.dart';
+import 'package:demoecommerceproduct/screens/pages/basket_page.dart';
 import 'package:demoecommerceproduct/services/apis_service.dart';
+import 'package:demoecommerceproduct/services/basket_service.dart';
 import 'package:demoecommerceproduct/services/isar_service.dart';
 import 'package:demoecommerceproduct/utilities/Utils.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +21,9 @@ class HomeController extends GetxController {
   var isForYouLoading = false.obs;
   var isForYouLoadingMore = false.obs;
   RxBool isForYouuLoadingg = false.obs;
+  var favoriteProducts = <ProductItem>[].obs;
+  var isFavoritesLoading = false.obs;
+  var isFavoritesEmpty = false.obs;
 
   var pageNumber = 1.obs;
   var forYouPageNumber = 1.obs;
@@ -29,6 +34,17 @@ class HomeController extends GetxController {
     // loadData();
     getCategoriesFromLocal();
     getForYouProducts();
+  }
+
+  void getFavoriteProducts() {
+    isFavoritesLoading.value = true;
+    ApisService.getAllFavoritesProducts((success) {
+      isFavoritesLoading.value = false;
+      favoriteProducts.value = success;
+      isFavoritesEmpty.value = favoriteProducts.isEmpty;
+    }, (fail) {
+      isFavoritesLoading.value = false;
+    });
   }
 
   void getCategoriesFromLocal() async {
@@ -266,19 +282,43 @@ class HomeController extends GetxController {
 
     // Get current user ID
     final user = await IsarService.instance.getCurrentUser();
-    if (user != null) {
-      ApisService.getForYouByUserId(
-          user.userId, "6", forYouPageNumber.value.toString(),
-          (ProductData productData) {
-        forYouProducts.value = productData.items;
-        isForYouLoading.value = false;
-      }, (error) {
-        isForYouLoading.value = false;
-        debugPrint("Error loading For You products: $error");
-      });
-    } else {
+    // if (user != null) {
+    ApisService.getForYouByUserId("2f54085d-00e8-4bc8-adaf-3a54e1d6c2be", "6",
+        forYouPageNumber.value.toString(), //user.userId
+        (ProductData productData) {
+      forYouProducts.value = productData.items;
       isForYouLoading.value = false;
-    }
+    }, (error) {
+      isForYouLoading.value = false;
+      debugPrint("Error loading For You products: $error");
+    });
+    // } else {
+    //   isForYouLoading.value = false;
+    // }
+  }
+
+  void addToBasket(
+      String productName,
+      double productCost,
+      String? productThumbnail,
+      String productid,
+      String? variantId,
+      BuildContext context,
+      {String? variantImage}) async {
+    isLoading.value = true;
+    await BasketService.instance
+        .addToBasket(CheckoutProduct(
+      productId: productid,
+      name: productName,
+      price: productCost,
+      imageUrl: variantImage ?? productThumbnail ?? "",
+      quantity: 1,
+      variantId: variantId,
+    ))
+        .then((onValue) {
+      isLoading.value = false;
+      Utils.showFlushbarSuccess(context, "Item added to Basket");
+    });
   }
 
   // Load more For You products (pagination)
@@ -290,29 +330,28 @@ class HomeController extends GetxController {
     isForYouuLoadingg.value = true;
     // Get current user ID
     final user = await IsarService.instance.getCurrentUser();
-    if (user != null) {
-      ApisService.getForYouByUserId(
-          user.userId, "6", forYouPageNumber.value.toString(),
-          (ProductData productData) {
-        // Add new products to existing list
-        if (productData.items.isEmpty) {
-          Utils.showFlushbarError(context, "No More For You Products!!");
-        } else {
-          forYouProducts.addAll(productData.items);
-        }
-        isForYouuLoadingg.value = false;
-        isForYouLoadingMore.value = false;
-      }, (error) {
-        isForYouLoadingMore.value = false;
-        isForYouuLoadingg.value = false;
-        // Decrease page number if API call failed
-        forYouPageNumber.value--;
-        debugPrint("Error loading more For You products: $error");
-      });
-    } else {
+    // if (user != null) {
+    ApisService.getForYouByUserId("2f54085d-00e8-4bc8-adaf-3a54e1d6c2be", "6",
+        forYouPageNumber.value.toString(), (ProductData productData) {
+      // Add new products to existing list
+      if (productData.items.isEmpty) {
+        Utils.showFlushbarError(context, "No More For You Products!!");
+      } else {
+        forYouProducts.addAll(productData.items);
+      }
       isForYouuLoadingg.value = false;
       isForYouLoadingMore.value = false;
+    }, (error) {
+      isForYouLoadingMore.value = false;
+      isForYouuLoadingg.value = false;
+      // Decrease page number if API call failed
       forYouPageNumber.value--;
-    }
+      debugPrint("Error loading more For You products: $error");
+    });
+    // } else {
+    //   isForYouuLoadingg.value = false;
+    //   isForYouLoadingMore.value = false;
+    //   forYouPageNumber.value--;
+    // }
   }
 }

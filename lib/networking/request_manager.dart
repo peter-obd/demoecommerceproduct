@@ -141,6 +141,38 @@ class RequestManager {
     }
   }
 
+  static void delete(
+      String url,
+      Map<String, String>? headers,
+      RequestSuccess success,
+      RequestFail fail) async {
+    try {
+      var uri = Uri.parse(url);
+      Print.white("DELETE Request: $url");
+
+      if (headers != null) {
+        Print.white("Headers:\n${json.encode(headers)}");
+      }
+
+      var response = await http.delete(uri, headers: headers);
+      if (response.statusCode == 200) {
+        Print.green("DELETE Request `$url` succeeded");
+        Print.green("Response:\n${json.encode(response.body)}");
+        success(response.body);
+        return;
+      }
+
+      Print.red("Response:\n${json.encode(response.body)}");
+      fail(RequestError(response.body, code: response.statusCode));
+    } on FormatException catch (error) {
+      fail(RequestError(error.message));
+      Print.red("Request `$url` failed. Error: ${error.message}");
+    } catch (e) {
+      fail(RequestError(e.toString()));
+      Print.red("Request `$url` failed. Error: ${e.toString()}");
+    }
+  }
+
   static String parseErrorMessage(Map<String, dynamic> response) {
     String error = "";
 

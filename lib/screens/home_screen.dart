@@ -1,4 +1,5 @@
 import 'package:demoecommerceproduct/controllers/basket_controller.dart';
+import 'package:demoecommerceproduct/controllers/home_controller.dart';
 import 'package:demoecommerceproduct/controllers/profile_controller.dart';
 import 'package:demoecommerceproduct/screens/oders_screen.dart';
 import 'package:demoecommerceproduct/screens/pages/basket_page.dart';
@@ -23,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController();
   final BasketController basketController = Get.put(BasketController());
   final ProfileController profileController = Get.put(ProfileController());
+  final HomeController homeController = Get.put(HomeController());
   final List<CheckoutProduct> products = [
     // CheckoutProduct(
     //   productId: "",
@@ -68,6 +70,8 @@ class _HomeScreenState extends State<HomeScreen> {
             basketController.getCheckoutProducts();
           } else if (index == 2) {
             profileController.getLocation();
+          } else if (index == 1) {
+            homeController.getFavoriteProducts();
           }
           setState(() {
             _currentIndex = index; // Updates the tab indicator
@@ -75,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         children: [
           HomePage(),
-          FavoritesPage(products: products),
+          FavoritesPage(products: homeController.favoriteProducts),
           MyProfileScreen(),
           BasketPage(
               // products: products,

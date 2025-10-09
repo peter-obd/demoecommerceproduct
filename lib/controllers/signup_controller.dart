@@ -20,10 +20,11 @@ class SignupController extends GetxController {
     return hasMinLength && hasUppercase && hasNumber;
   }
 
-  void signup(
-      String fullPhoneNumber, BuildContext context, String password) async {
+  void signup(String fullPhoneNumber, BuildContext context, String password,
+      String firstName, String lastName) async {
     isLoading.value = true;
-    ApisService.signup(fullPhoneNumber, password, (success) {
+    ApisService.signup(firstName, lastName, fullPhoneNumber, password,
+        (success) {
       isLoading.value = false;
       showOtpVerificationPopup(context, success, () {
         isOtpLoading.value = true;

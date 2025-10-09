@@ -22,7 +22,7 @@ class ProductData {
   factory ProductData.fromJson(Map<String, dynamic> json) {
     return ProductData(
       items: (json['items'] as List<dynamic>?)
-              ?.map((e) => ProductItem.fromJson(e))
+              ?.map((e) => ProductItem.fromJson(e, false))
               .toList() ??
           [],
       totalCount: json['totalCount'] ?? 0,

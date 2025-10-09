@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:demoecommerceproduct/models/category_model.dart';
+import 'package:demoecommerceproduct/models/on_checkout_order_product_model.dart';
+import 'package:demoecommerceproduct/models/order_model.dart';
 import 'package:demoecommerceproduct/models/product/product_data_model.dart';
 import 'package:demoecommerceproduct/models/product/product_model.dart';
 import 'package:demoecommerceproduct/models/user.dart';
@@ -15,6 +17,7 @@ typedef ProductDataSuccess = Function(ProductData productData);
 typedef ProductSuccess = Function(List<ProductItem> productData);
 typedef UserSuccess = Function(User user);
 typedef addFavoriteProductSuccess = Function(bool success);
+typedef OrdersHistorySuccess = Function(List<OrderModel> orders);
 
 class ApisService {
   static const String _baseUrl = "https://onedollarapp.onrender.com/";
@@ -40,13 +43,15 @@ class ApisService {
     }, (error) => fail(error));
   }
 
-  static void signup(
-      String phone, String password, RequestSuccess success, RequestFail fail) {
+  static void signup(String firstName, String lastName, String phone,
+      String password, RequestSuccess success, RequestFail fail) {
     var urlMethod = "Auth/signup";
     var url = _baseUrl + _urlPath + urlMethod;
     var params = {
       "phone": phone,
       "password": password,
+      "firstName": firstName,
+      "lastName": lastName
     };
     AppRequestManager.postWithToken(url, params, null, true, true, (response) {
       try {
@@ -151,14 +156,59 @@ class ApisService {
     var urlMethod = "Auth/login";
     var url = _baseUrl + _urlPath + urlMethod;
     var params = {"phone": phone, "password": password};
-    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+    AppRequestManager.postWithToken(url, params, null, true, false,
+        (response) async {
       try {
         Map<String, dynamic> result = json.decode(response);
         User user = User.fromJson(result['data']);
-        IsarService.instance.saveUser(user);
+        await IsarService.instance.saveUser(user);
         success(user);
       } catch (e) {
         debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void checkoutOrder(
+      String couponCode,
+      List<OnCheckoutOrderProductModel> products,
+      RequestSuccess success,
+      RequestFail fail) {
+    var urlMethod = "Order/checkout";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {
+      "couponCode": couponCode,
+      "orderItems": products.map((p) => p.toJson()).toList(),
+    };
+
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        if (result['success'] == true) {
+          success("successData");
+        }
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void getOrdersHistory(OrdersHistorySuccess success, RequestFail fail) {
+    String urlMethod =
+        'Order/get-orders-by-user-with-details-paginated?pageNumber=1&pageSize=1000&sortDescending=true';
+    var url = _baseUrl + _urlPath + urlMethod;
+
+    AppRequestManager.getWithToken(url, null, null, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        var orderList = result['data']['items'];
+        List<OrderModel> orders = [];
+        for (var order in orderList) {
+          orders.add(OrderModel.fromJson(order));
+        }
+        success(orders);
+      } catch (e) {
+        debugPrint("Could not parse  : ${e.toString()}");
       }
     }, (error) => fail(error));
   }
@@ -219,10 +269,32 @@ class ApisService {
         var items = result['data'];
         List<ProductItem> products = [];
         for (var product in items) {
-          products.add(ProductItem.fromJson(product));
+          products.add(ProductItem.fromJson(product, false));
         }
 
         await IsarService.instance.saveMultipleProducts(products);
+
+        success(products);
+      } catch (e) {
+        debugPrint("Could not parse  : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void getAllFavoritesProducts(
+      ProductSuccess success, RequestFail fail) {
+    var urlMethod =
+        "Favorite/get-favorites-by-user-with-details-paginated?pageNumber=1&pageSize=10&sortDescending=true";
+    var url = _baseUrl + _urlPath + urlMethod;
+
+    AppRequestManager.getWithToken(url, null, null, true, (response) async {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        var items = result['data']['items'];
+        List<ProductItem> products = [];
+        for (var product in items) {
+          products.add(ProductItem.fromJson(product, true));
+        }
 
         success(products);
       } catch (e) {
@@ -250,6 +322,38 @@ class ApisService {
     }, (error) => fail(error));
   }
 
+  // static void deletFavitProduct(
+  //     String productId, addFavoriteProductSuccess success, RequestFail fail) {
+  //   var urlMethod = "Favorite/delete/$productId";
+  //   var url = _baseUrl + _urlPath + urlMethod;
+
+  //   AppRequestManager.deleteWithToken(url, null, true, (response) {
+  //     try {
+  //       Map<String, dynamic> result = json.decode(response);
+  //       bool successData = result['success'];
+  //       success(successData);
+  //     } catch (e) {
+  //       debugPrint("Could not parse Favorite Product: ${e.toString()}");
+  //     }
+  //   }, (error) => fail(error));
+  // }
+
+  static void toggleFavoriteProduct(String productId, bool trueOrFalse,
+      addFavoriteProductSuccess success, RequestFail fail) {
+    var urlMethod = "Favorite/toggle-favorite-product";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {"productId": productId, "isFavorite": trueOrFalse};
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        bool successData = result['success'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse Favorite Product: ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
   static void searchProduct(
       String searchText, ProductSuccess success, RequestFail fail) {
     var urlMethod = "Product/product-search";
@@ -264,7 +368,7 @@ class ApisService {
         List data = result['data'];
         List<ProductItem> products = [];
         for (var product in data) {
-          products.add(ProductItem.fromJson(product));
+          products.add(ProductItem.fromJson(product, false));
         }
         success(products);
       } catch (e) {

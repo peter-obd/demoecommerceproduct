@@ -125,6 +125,7 @@ class ProductItem {
   late double sellingPrice;
   late double discount;
   late String currency;
+
   String? thumbnail;
   bool? isFavorite;
   late double rating;
@@ -210,7 +211,10 @@ class ProductItem {
     return attributes.toList();
   }
 
-  factory ProductItem.fromJson(Map<String, dynamic> json) {
+  factory ProductItem.fromJson(Map<String, dynamic> jso, bool isFavorite) {
+    var json;
+    isFavorite ? json = jso['product'] : json = jso;
+
     final product = ProductItem(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
@@ -227,6 +231,7 @@ class ProductItem {
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       createdAt: json['createdAt'] ?? '',
       updatedAt: json['updatedAt'] ?? '',
+      isFavorite: json['isFavorite'] ?? false,
     );
 
     // Handle relationships

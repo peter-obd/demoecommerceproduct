@@ -4,6 +4,7 @@ import 'package:demoecommerceproduct/models/product/product_model.dart';
 import 'package:demoecommerceproduct/models/product_model.dart';
 import 'package:demoecommerceproduct/screens/product_details_screen.dart';
 import 'package:demoecommerceproduct/services/apis_service.dart';
+import 'package:demoecommerceproduct/services/isar_service.dart';
 import 'package:get/get.dart';
 
 class SearchControllerr extends GetxController {
@@ -27,12 +28,15 @@ class SearchControllerr extends GetxController {
 
   void searchProducts(String searchText) {
     isLoading.value = true;
-    ApisService.searchProduct(searchText, (success) {
+    ApisService.searchProduct(searchText, (success) async {
       isLoading.value = false;
       filteredProducts.value = [];
-      filteredProducts.value = success;
-      if (filteredProducts.isEmpty) {
+
+      if (success.isEmpty) {
         noItemFound.value = true;
+      } else {
+        await IsarService.instance.saveMultipleProductsUpsert(success);
+        filteredProducts.value = success;
       }
     }, (fail) {
       filteredProducts.value = [];

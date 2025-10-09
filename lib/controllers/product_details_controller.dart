@@ -17,8 +17,14 @@ class ProductDetailsController extends GetxController {
   RxBool isFavorite = false.obs;
   RxBool isLoading = false.obs;
 
-  void addToBasket(String productName, double productCost,
-      String? productThumbnail, String productid, String? variantId, BuildContext context, {String? variantImage}) async {
+  void addToBasket(
+      String productName,
+      double productCost,
+      String? productThumbnail,
+      String productid,
+      String? variantId,
+      BuildContext context,
+      {String? variantImage}) async {
     isLoading.value = true;
     await BasketService.instance
         .addToBasket(CheckoutProduct(
@@ -35,16 +41,16 @@ class ProductDetailsController extends GetxController {
     });
   }
 
-  void addProductToFavorites(ProductItem product, String userId,
-      String productId, BuildContext context) {
-    isFavorite.value = true;
-    ApisService.addToFavorites(productId, userId, (success) {
-      product.isFavorite = success;
-      isFavorite.value = success;
-      update();
-    }, (fail) {
-      isFavorite.value = false;
-      Utils.showFlushbarError(context, "could not add Item to Favorites");
-    });
-  }
+  // void addProductToFavorites(ProductItem product, String userId,
+  //     String productId, BuildContext context) {
+  //   isFavorite.value = true;
+  //   ApisService.addToFavorites(productId, userId, (success) {
+  //     product.isFavorite = success;
+  //     isFavorite.value = success;
+  //     update();
+  //   }, (fail) {
+  //     isFavorite.value = false;
+  //     Utils.showFlushbarError(context, "could not add Item to Favorites");
+  //   });
+  // }
 }

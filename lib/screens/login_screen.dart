@@ -38,12 +38,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     children: [
                       const Expanded(
-                          flex: 2,
+                          flex: 3,
                           child: LoginSignupAppbar(
                             title: "Welcome\nBack",
                           )),
                       Expanded(
-                          flex: 4,
+                          flex: 7,
                           child: Container(
                               width: double.infinity,
                               decoration: const BoxDecoration(
@@ -59,14 +59,13 @@ class _LoginScreenState extends State<LoginScreen> {
               )),
           Obx(
             () => loginController.isLoading.value
-                ? Expanded(
-                    child: Container(
-                        color: Colors.black.withOpacity(0.5),
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primary,
-                          ),
-                        )))
+                ? Container(
+                    color: Colors.black.withOpacity(0.5),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    ))
                 : const SizedBox(),
           )
         ],

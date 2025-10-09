@@ -33,7 +33,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         title: "Sign up\nand enjoy",
                       )),
                   Expanded(
-                      flex: 4,
+                      flex: 6,
                       child: Container(
                           width: double.infinity,
                           decoration: const BoxDecoration(

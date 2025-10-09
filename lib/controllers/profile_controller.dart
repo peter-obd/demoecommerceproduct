@@ -1,4 +1,7 @@
+import 'package:demoecommerceproduct/models/user.dart';
 import 'package:demoecommerceproduct/screens/location_address_screen.dart';
+import 'package:demoecommerceproduct/screens/login_screen.dart';
+import 'package:demoecommerceproduct/services/isar_service.dart';
 import 'package:demoecommerceproduct/services/location_storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -7,16 +10,27 @@ class ProfileController extends GetxController {
   final Rx<PickedLocation?> _location = Rx<PickedLocation?>(null);
   PickedLocation? get location => _location.value;
   set location(PickedLocation? value) => _location.value = value;
+  User? user;
 
   @override
   void onInit() {
     // TODO: implement onInit
     super.onInit();
+    getUser();
     getLocation();
+  }
+
+  void getUser() async {
+    user = await IsarService.instance.getCurrentUser();
   }
 
   void getLocation() async {
     location = await LocationStorageService.getSavedLocation();
+  }
+
+  void logoutUser() async {
+    await IsarService.instance.clearUser();
+    Get.offAll(const LoginScreen());
   }
 
   Future<void> pickLocation(BuildContext context) async {

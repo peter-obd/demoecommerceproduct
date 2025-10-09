@@ -105,6 +105,19 @@ class IsarService {
     return await db.users.where().findFirst();
   }
 
+  // Update user token
+  Future<void> updateUserToken(String newToken) async {
+    final user = await getCurrentUser();
+    if (user == null) return;
+
+    user.token = newToken;
+
+    final db = await isar;
+    await db.writeTxn(() async {
+      await db.users.put(user);
+    });
+  }
+
   // Check if user is logged in and token is not expired
   Future<bool> isUserLoggedIn() async {
     final user = await getCurrentUser();
@@ -215,6 +228,25 @@ class IsarService {
     await db.writeTxn(() async {
       await db.categorys.clear();
     });
+  }
+
+  // ========================================
+  // GET PRODUCT BY PRODUCT ID AND UPDATE ITS ISFAVORITE
+  // ========================================
+  Future<void> updateProductIsFavoriteById(
+      String productId, bool isFavorite) async {
+    final db = await isar;
+
+    final product =
+        await db.productItems.filter().idEqualTo(productId).findFirst();
+
+    if (product != null) {
+      product.isFavorite = isFavorite;
+
+      await db.writeTxn(() async {
+        await db.productItems.put(product);
+      });
+    }
   }
 
   // ========================================
@@ -459,7 +491,7 @@ class IsarService {
   // SAVE FROM JSON WITH AUTOMATIC RELATIONSHIP SETUP
   // ========================================
   Future<void> saveProductFromJson(Map<String, dynamic> json) async {
-    final product = ProductItem.fromJson(json);
+    final product = ProductItem.fromJson(json, false);
 
     // The relationships are already set up in ProductItem.fromJson()
     // Now we just need to save everything
@@ -472,7 +504,7 @@ class IsarService {
   Future<void> saveMultipleProductsFromJson(
       List<Map<String, dynamic>> jsonList) async {
     final products =
-        jsonList.map((json) => ProductItem.fromJson(json)).toList();
+        jsonList.map((json) => ProductItem.fromJson(json, false)).toList();
     await saveMultipleProducts(products);
   }
 
