@@ -6,6 +6,7 @@ import 'package:demoecommerceproduct/models/order_model.dart';
 import 'package:demoecommerceproduct/models/product/product_data_model.dart';
 import 'package:demoecommerceproduct/models/product/product_model.dart';
 import 'package:demoecommerceproduct/models/user.dart';
+import 'package:demoecommerceproduct/models/user_address_model.dart';
 import 'package:demoecommerceproduct/networking/app_request_manager.dart';
 import 'package:demoecommerceproduct/networking/request_manager.dart';
 import 'package:demoecommerceproduct/services/isar_service.dart';
@@ -18,6 +19,9 @@ typedef ProductSuccess = Function(List<ProductItem> productData);
 typedef UserSuccess = Function(User user);
 typedef addFavoriteProductSuccess = Function(bool success);
 typedef OrdersHistorySuccess = Function(List<OrderModel> orders);
+typedef UserAddressesSuccess = Function(List<UserAddress> addresses);
+typedef SetDefaultAddressSuccess = Function(UserAddress updatedAddress);
+typedef GetDefaultAddressSuccess = Function(UserAddress? defaultAddress);
 
 class ApisService {
   static const String _baseUrl = "https://onedollarapp.onrender.com/";
@@ -167,6 +171,90 @@ class ApisService {
         debugPrint("Could not parse : ${e.toString()}");
       }
     }, (error) => fail(error));
+  }
+
+  static void addUserAddress(String title, String description, double long,
+      double lat, bool isDefault, RequestSuccess success, RequestFail fail) {
+    var urlMethod = "UserAddress/add-user-address";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {
+      "title": title,
+      "description": description,
+      "longitude": long,
+      "latitude": lat,
+      "isDefault": isDefault
+    };
+
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        bool successData = result['success'];
+        if (successData) {
+          success("successData");
+        }
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void getUserAddresses(UserAddressesSuccess success, RequestFail fail) {
+    var urlMethod = "UserAddress/get-addresses-by-user";
+    var url = _baseUrl + _urlPath + urlMethod;
+
+    AppRequestManager.getWithToken(url, null, null, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        List data = result['data'];
+        List<UserAddress> addresses = [];
+        for (var address in data) {
+          addresses.add(UserAddress.fromJson(address));
+        }
+        success(addresses);
+      } catch (e) {
+        debugPrint("Could not parse user addresses: ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void setDefaultAddress(String addressId, SetDefaultAddressSuccess success, RequestFail fail) {
+    var urlMethod = "UserAddress/set-default-address/$addressId";
+    var url = _baseUrl + _urlPath + urlMethod;
+
+    AppRequestManager.postWithToken(url, {}, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        if (result['success'] == true) {
+          UserAddress updatedAddress = UserAddress.fromJson(result['data']);
+          success(updatedAddress);
+        }
+      } catch (e) {
+        debugPrint("Could not parse set default address response: ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void getDefaultAddress(GetDefaultAddressSuccess success, RequestFail fail) {
+    var urlMethod = "UserAddress/get-default-address";
+    var url = _baseUrl + _urlPath + urlMethod;
+
+    AppRequestManager.getWithToken(url, null, null, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        if (result['success'] == true && result['data'] != null) {
+          UserAddress defaultAddress = UserAddress.fromJson(result['data']);
+          success(defaultAddress);
+        } else {
+          success(null);
+        }
+      } catch (e) {
+        debugPrint("Could not parse get default address response: ${e.toString()}");
+        success(null);
+      }
+    }, (error) {
+      debugPrint("Failed to get default address: $error");
+      success(null);
+    });
   }
 
   static void checkoutOrder(

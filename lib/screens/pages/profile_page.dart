@@ -2,6 +2,7 @@ import 'package:demoecommerceproduct/controllers/profile_controller.dart';
 import 'package:demoecommerceproduct/screens/edit_profile_screen.dart';
 import 'package:demoecommerceproduct/screens/help_support_screen.dart';
 import 'package:demoecommerceproduct/screens/oders_screen.dart';
+import 'package:demoecommerceproduct/screens/manage_addresses_screen.dart';
 import 'package:demoecommerceproduct/values/colors.dart';
 import 'package:demoecommerceproduct/values/constants.dart';
 import 'package:demoecommerceproduct/values/responsive.dart';
@@ -133,11 +134,11 @@ class MyProfileScreen extends StatelessWidget {
             ),
 
             _buildEnhancedMenuItem(
-              'Shopping Address',
+              'Shopping Addresses',
               'Manage your delivery addresses',
               Icons.location_on_rounded,
               responsive,
-              onTap: () => controller.pickLocation(Get.context!),
+              onTap: () => Get.to(() => const ManageAddressesScreen()),
             ),
 
             _buildEnhancedMenuItem(
@@ -316,7 +317,7 @@ class MyProfileScreen extends StatelessWidget {
           // Enhanced Location Section
           GestureDetector(
             onTap: () {
-              controller.pickLocation(Get.context!);
+              Get.to(() => const ManageAddressesScreen());
             },
             child: Container(
               padding: EdgeInsets.all(responsive.wp(15)),
@@ -348,7 +349,7 @@ class MyProfileScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Current Location",
+                          "Default Delivery Address",
                           style: AppTextStyle.textStyle(
                             responsive.sp(28),
                             AppColors.greyText,
@@ -357,14 +358,37 @@ class MyProfileScreen extends StatelessWidget {
                         ),
                         Obx(
                           () => Text(
-                            controller.location?.address ??
-                                "No address chosen yet",
+                            controller.defaultAddress?.title ??
+                                "No selected address",
                             style: AppTextStyle.textStyle(
                               responsive.sp(32),
-                              AppColors.blackText,
+                              controller.defaultAddress != null 
+                                  ? AppColors.blackText 
+                                  : AppColors.greyText,
                               FontWeight.w600,
                             ),
                           ),
+                        ),
+                        Obx(
+                          () => controller.defaultAddress != null
+                              ? Text(
+                                  controller.defaultAddress!.description,
+                                  style: AppTextStyle.textStyle(
+                                    responsive.sp(26),
+                                    AppColors.greyText,
+                                    FontWeight.w400,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                )
+                              : Text(
+                                  "Tap to add your delivery address",
+                                  style: AppTextStyle.textStyle(
+                                    responsive.sp(26),
+                                    AppColors.greyText,
+                                    FontWeight.w400,
+                                  ),
+                                ),
                         ),
                       ],
                     ),

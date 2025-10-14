@@ -720,18 +720,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ),
             ),
             SizedBox(height: responsive.hp(10)),
-
-            // Price Section with enhanced styling
-            _buildEnhancedPriceSection(responsive),
-
-            SizedBox(height: responsive.hp(25)),
-
-            // Stock Section with enhanced styling
-            _buildEnhancedStockSection(responsive),
-
-            SizedBox(height: responsive.hp(25)),
-
-            // Enhanced Dynamic Attributes
+// Enhanced Dynamic Attributes
             ..._availableAttributes.entries.map((attributeEntry) {
               final attributeName = attributeEntry.key;
               final availableValues = attributeEntry.value;
@@ -744,6 +733,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 availableValues,
               );
             }),
+            // Price Section with enhanced styling
+            _buildEnhancedPriceSection(responsive),
+
+            SizedBox(height: responsive.hp(25)),
+
+            // Stock Section with enhanced styling
+            _buildEnhancedStockSection(responsive),
+
+            SizedBox(height: responsive.hp(25)),
 
             SizedBox(height: responsive.hp(25)),
 

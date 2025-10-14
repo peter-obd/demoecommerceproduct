@@ -4,7 +4,8 @@ class OrderModel {
   List<ProductItem>? orderItems;
   String? id;
   String? userId;
-  List<dynamic>? statuses;
+  // List<dynamic>? statuses;
+  String? currentStatus;
   num? totalCost;
   num? totalSelling;
   num? profitMargin;
@@ -19,7 +20,8 @@ class OrderModel {
     this.orderItems,
     this.id,
     this.userId,
-    this.statuses,
+    this.currentStatus,
+    // this.statuses,
     this.totalCost,
     this.totalSelling,
     this.profitMargin,
@@ -35,12 +37,13 @@ class OrderModel {
     return OrderModel(
       orderItems: json['orderItems'] != null
           ? List<ProductItem>.from(
-              json['orderItems'].map((x) => ProductItem.fromJson(x, true)))
+              json['orderItems'].map((x) => ProductItem.fromJson(x, false)))
           : [],
       id: json['id'] ?? "",
       userId: json['userId'] ?? "",
-      statuses:
-          json['statuses'] != null ? List<dynamic>.from(json['statuses']) : [],
+      currentStatus: json['currentStatus'] ?? "",
+      // statuses:
+      //     json['statuses'] != null ? List<dynamic>.from(json['statuses']) : [],
       totalCost: json['totalCost'] ?? 0,
       totalSelling: json['totalSelling'] ?? 0,
       profitMargin: json['profitMargin'] ?? 0,
@@ -59,8 +62,9 @@ class OrderModel {
           ? List<dynamic>.from(orderItems!.map((x) => x.toJson()))
           : [],
       "id": id,
+
       "userId": userId,
-      "statuses": statuses ?? [],
+      // "statuses": statuses ?? [],
       "totalCost": totalCost,
       "totalSelling": totalSelling,
       "profitMargin": profitMargin,

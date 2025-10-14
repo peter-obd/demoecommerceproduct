@@ -12,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:demoecommerceproduct/services/location_storage_service.dart';
+import 'package:demoecommerceproduct/services/apis_service.dart';
 
 class OsmLocationPickerPage extends StatefulWidget {
   /// Optional initial camera center.
@@ -167,6 +168,69 @@ class _OsmLocationPickerPageState extends State<OsmLocationPickerPage> {
           behavior: SnackBarBehavior.floating,
         ),
       );
+    }
+  }
+
+  Future<AddressInputResult?> _showAddressInputDialog() async {
+    return showDialog<AddressInputResult>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AddressInputDialog(
+        currentAddress: _address ?? 'Unknown address',
+        latitude: _center.latitude,
+        longitude: _center.longitude,
+      ),
+    );
+  }
+
+  Future<void> _saveUserAddress(AddressInputResult result) async {
+    try {
+      ApisService.addUserAddress(
+        result.title,
+        result.description,
+        _center.longitude,
+        _center.latitude,
+        result.isDefault,
+        (success) async {
+          final location = PickedLocation(
+            lat: _center.latitude,
+            lng: _center.longitude,
+            address: _address,
+          );
+          await _saveLocationToPrefs(location);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Address saved successfully!'),
+                backgroundColor: AppColors.primary,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            Navigator.of(context).pop(location);
+          }
+        },
+        (error) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to save address: $error'),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving address: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -463,14 +527,9 @@ class _OsmLocationPickerPageState extends State<OsmLocationPickerPage> {
                             height: responsive.hp(42),
                             child: ElevatedButton.icon(
                               onPressed: () async {
-                                final location = PickedLocation(
-                                  lat: _center.latitude,
-                                  lng: _center.longitude,
-                                  address: _address,
-                                );
-                                await _saveLocationToPrefs(location);
-                                if (mounted) {
-                                  Navigator.of(context).pop(location);
+                                final result = await _showAddressInputDialog();
+                                if (result != null) {
+                                  await _saveUserAddress(result);
                                 }
                               },
                               style: ElevatedButton.styleFrom(
@@ -689,4 +748,318 @@ class _SearchItem {
   final String displayName;
   final LatLng point;
   _SearchItem({required this.displayName, required this.point});
+}
+
+class AddressInputResult {
+  final String title;
+  final String description;
+  final bool isDefault;
+
+  AddressInputResult({
+    required this.title,
+    required this.description,
+    required this.isDefault,
+  });
+}
+
+class AddressInputDialog extends StatefulWidget {
+  final String currentAddress;
+  final double latitude;
+  final double longitude;
+
+  const AddressInputDialog({
+    Key? key,
+    required this.currentAddress,
+    required this.latitude,
+    required this.longitude,
+  }) : super(key: key);
+
+  @override
+  State<AddressInputDialog> createState() => _AddressInputDialogState();
+}
+
+class _AddressInputDialogState extends State<AddressInputDialog> {
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  bool _isDefault = false;
+  bool _loading = false;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var responsive = Responsive(context);
+    return Dialog(
+      backgroundColor: AppColors.secondary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(responsive.wp(40)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Add Address Details',
+              style: AppTextStyle.textStyle(
+                responsive.sp(40),
+                AppColors.blackText,
+                FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: responsive.hp(20)),
+            Container(
+              padding: EdgeInsets.all(responsive.wp(20)),
+              decoration: BoxDecoration(
+                color: AppColors.greyBackground,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Current Location:',
+                    style: AppTextStyle.textStyle(
+                      responsive.sp(26),
+                      AppColors.greyText,
+                      FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: responsive.hp(8)),
+                  Text(
+                    widget.currentAddress,
+                    style: AppTextStyle.textStyle(
+                      responsive.sp(28),
+                      AppColors.blackText,
+                      FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: responsive.hp(5)),
+                  Text(
+                    '${widget.latitude.toStringAsFixed(4)}, ${widget.longitude.toStringAsFixed(4)}',
+                    style: AppTextStyle.textStyle(
+                      responsive.sp(24),
+                      AppColors.greyText,
+                      FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: responsive.hp(30)),
+            Text(
+              'Address Title',
+              style: AppTextStyle.textStyle(
+                responsive.sp(30),
+                AppColors.blackText,
+                FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: responsive.hp(10)),
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(
+                hintText: 'e.g., Home, Work, Office',
+                hintStyle: AppTextStyle.textStyle(
+                  responsive.sp(28),
+                  AppColors.greyText,
+                  FontWeight.w400,
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: responsive.wp(20),
+                  vertical: responsive.hp(15),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.greyText),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.greyText),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
+              ),
+              style: AppTextStyle.textStyle(
+                responsive.sp(28),
+                AppColors.blackText,
+                FontWeight.w400,
+              ),
+            ),
+            SizedBox(height: responsive.hp(20)),
+            Text(
+              'Detailed Description',
+              style: AppTextStyle.textStyle(
+                responsive.sp(30),
+                AppColors.blackText,
+                FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: responsive.hp(10)),
+            TextField(
+              controller: _descriptionController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText:
+                    'Building name, floor, apartment number, nearby landmarks...',
+                hintStyle: AppTextStyle.textStyle(
+                  responsive.sp(28),
+                  AppColors.greyText,
+                  FontWeight.w400,
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: responsive.wp(20),
+                  vertical: responsive.hp(15),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.greyText),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.greyText),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
+              ),
+              style: AppTextStyle.textStyle(
+                responsive.sp(28),
+                AppColors.blackText,
+                FontWeight.w400,
+              ),
+            ),
+            SizedBox(height: responsive.hp(20)),
+            Row(
+              children: [
+                Checkbox(
+                  value: _isDefault,
+                  onChanged: (value) {
+                    setState(() {
+                      _isDefault = value ?? false;
+                    });
+                  },
+                  activeColor: AppColors.primary,
+                ),
+                SizedBox(width: responsive.wp(10)),
+                Text(
+                  'Set as default address',
+                  style: AppTextStyle.textStyle(
+                    responsive.sp(28),
+                    AppColors.blackText,
+                    FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: responsive.hp(30)),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: responsive.hp(45),
+                    child: ElevatedButton(
+                      onPressed:
+                          _loading ? null : () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.greyBackground,
+                        foregroundColor: AppColors.blackText,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: AppTextStyle.textStyle(
+                          responsive.sp(30),
+                          AppColors.blackText,
+                          FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: responsive.wp(15)),
+                Expanded(
+                  child: SizedBox(
+                    height: responsive.hp(45),
+                    child: ElevatedButton(
+                      onPressed: _loading ? null : _saveAddress,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.secondary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: _loading
+                          ? SizedBox(
+                              width: responsive.wp(40),
+                              height: responsive.wp(40),
+                              child: CircularProgressIndicator(
+                                color: AppColors.secondary,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              'Save Address',
+                              style: AppTextStyle.textStyle(
+                                responsive.sp(30),
+                                AppColors.secondary,
+                                FontWeight.w600,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _saveAddress() {
+    if (_titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please enter an address title'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (_descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please enter a detailed description'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final result = AddressInputResult(
+      title: _titleController.text.trim(),
+      description: _descriptionController.text.trim(),
+      isDefault: _isDefault,
+    );
+
+    Navigator.of(context).pop(result);
+  }
 }

@@ -415,11 +415,11 @@ class EnhancedOrderCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: Colors
-                            .red, //_getStatusColor(order.status).withOpacity(0.1),
+                            .white, //_getStatusColor(order.status).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: Colors
-                              .red, //_getStatusColor(order.status).withOpacity(0.3),
+                              .white, //_getStatusColor(order.status).withOpacity(0.3),
                           width: 1,
                         ),
                       ),
@@ -431,17 +431,16 @@ class EnhancedOrderCard extends StatelessWidget {
                             height: responsive.wp(8),
                             decoration: BoxDecoration(
                               color:
-                                  Colors.red, //_getStatusColor(order.status),
+                                  Colors.white, //_getStatusColor(order.status),
                               shape: BoxShape.circle,
                             ),
                           ),
                           SizedBox(width: responsive.wp(8)),
                           Text(
-                            "zabeta",
-                            //  order.status,
+                            order.currentStatus ?? "N/A",
                             style: AppTextStyle.textStyle(
                               responsive.sp(28),
-                              Colors.white,
+                              AppColors.primary,
                               //  _getStatusColor(order.status),
                               FontWeight.w600,
                             ),
