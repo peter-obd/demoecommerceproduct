@@ -19,12 +19,37 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
   bool isSelected = true;
-  final PageController _pageController = PageController();
+  late PageController _pageController;
   final BasketController basketController = Get.put(BasketController());
   final ProfileController profileController = Get.put(ProfileController());
   final HomeController homeController = Get.put(HomeController());
+
+  @override
+  void initState() {
+    super.initState();
+    // Get initial index from arguments if provided
+    final args = Get.arguments;
+    _currentIndex = (args != null && args['initialIndex'] != null)
+        ? args['initialIndex'] as int
+        : 0;
+    _pageController = PageController(initialPage: _currentIndex);
+
+    // Refresh data for the initial page (since onPageChanged won't fire for initial page)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_currentIndex == 3) {
+        // Basket page
+        basketController.getCheckoutProducts();
+      } else if (_currentIndex == 2) {
+        // Profile page
+        profileController.getLocation();
+      } else if (_currentIndex == 1) {
+        // Favorites page
+        homeController.getFavoriteProducts();
+      }
+    });
+  }
   final List<CheckoutProduct> products = [
     // CheckoutProduct(
     //   productId: "",

@@ -88,6 +88,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         .toList();
   }
 
+  // Check if a specific attribute value is available given current selections
+  bool _isAttributeValueAvailable(String attributeName, String value) {
+    final allVariants = widget.product.allVariants;
+    if (allVariants.isEmpty) return false;
+
+    // Create a test selection with the value we're checking
+    final testSelection = Map<String, String>.from(_selectedAttributes);
+    testSelection[attributeName] = value;
+
+    // Check if any variant matches this combination
+    return allVariants.any((variant) {
+      final attributes = variant.getAttributesValues();
+      return testSelection.entries
+          .every((entry) => attributes[entry.key] == entry.value);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -111,11 +128,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           widget.product.thumbnail != null ? [widget.product.thumbnail!] : [];
     }
 
-    // Initialize available attributes for all attribute types
+    // Initialize available attributes - show ALL values for each attribute
     final allAttributeNames = _getAllAttributeNames();
     for (final attributeName in allAttributeNames) {
-      _availableAttributes[attributeName] =
-          _getAvailableValuesForAttribute(attributeName);
+      // Get ALL possible values for this attribute (no filtering)
+      final allValues = allVariants
+          .map((variant) => variant.getAttributesValues()[attributeName])
+          .whereType<String>()
+          .toSet()
+          .toList();
+      _availableAttributes[attributeName] = allValues;
     }
   }
 
@@ -333,22 +355,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           match.getAttributesValues().map((k, v) => MapEntry(k, v.toString()));
       _currentImages = match.images;
 
-      // update available attributes based on current selection
-      final allAttributeNames = _getAllAttributeNames();
-      for (final attrName in allAttributeNames) {
-        if (attrName != attributeName) {
-          // Create a filter map excluding the current attribute being updated
-          final filterMap = Map<String, String>.from(_selectedAttributes);
-          filterMap.remove(attrName);
-          _availableAttributes[attrName] =
-              _getAvailableValuesForAttribute(attrName, filterBy: filterMap);
-        }
-      }
+      // Don't update available attributes - we always show all options
+      // Availability will be determined by _isAttributeValueAvailable method
     });
   }
 
   Widget _buildEnhancedColorWidget(
-      String colorHex, bool isSelected, Responsive responsive) {
+      String colorHex, bool isSelected, bool isEnabled, Responsive responsive) {
     final color = hexToColor(colorHex);
     return Container(
       margin: EdgeInsets.only(right: responsive.wp(15)),
@@ -372,66 +385,95 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             ),
           ],
         ),
-        child: Container(
-          margin: EdgeInsets.all(responsive.wp(4)),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color,
-            border: color == const Color(0xffffffff)
-                ? Border.all(color: Colors.black26, width: 1)
-                : null,
-          ),
-          child: isSelected
-              ? Icon(
-                  Icons.check_rounded,
-                  color: color == const Color(0xffffffff)
-                      ? Colors.black
-                      : Colors.white,
-                  size: responsive.sp(35),
-                )
-              : null,
+        child: Stack(
+          children: [
+            Container(
+              margin: EdgeInsets.all(responsive.wp(4)),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isEnabled ? color : color.withOpacity(0.3),
+                border: color == const Color(0xffffffff)
+                    ? Border.all(color: Colors.black26, width: 1)
+                    : null,
+              ),
+            ),
+            // Diagonal line for disabled state
+            if (!isEnabled)
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _DiagonalLinePainter(
+                    color: Colors.red.withOpacity(0.7),
+                    strokeWidth: 2.0,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildEnhancedTextWidget(
-      String value, bool isSelected, Responsive responsive) {
+      String value, bool isSelected, bool isEnabled, Responsive responsive) {
     return Container(
       margin: EdgeInsets.only(right: responsive.wp(15)),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: EdgeInsets.symmetric(
-          horizontal: responsive.wp(20),
-          vertical: responsive.hp(12),
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : AppColors.greyShadow.withOpacity(0.5),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isSelected
-                  ? AppColors.primary.withOpacity(0.3)
-                  : Colors.black.withOpacity(0.05),
-              blurRadius: isSelected ? 12 : 6,
-              offset: Offset(0, isSelected ? 4 : 2),
+      child: Stack(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            padding: EdgeInsets.symmetric(
+              horizontal: responsive.wp(20),
+              vertical: responsive.hp(12),
             ),
-          ],
-        ),
-        child: Text(
-          value,
-          style: AppTextStyle.textStyle(
-            responsive.sp(32),
-            isSelected ? Colors.white : AppColors.blackText,
-            FontWeight.w600,
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppColors.primary
+                  : isEnabled
+                      ? Colors.white
+                      : Colors.grey.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: isSelected
+                    ? AppColors.primary
+                    : isEnabled
+                        ? AppColors.greyShadow.withOpacity(0.5)
+                        : Colors.grey.withOpacity(0.3),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isSelected
+                      ? AppColors.primary.withOpacity(0.3)
+                      : Colors.black.withOpacity(0.05),
+                  blurRadius: isSelected ? 12 : 6,
+                  offset: Offset(0, isSelected ? 4 : 2),
+                ),
+              ],
+            ),
+            child: Text(
+              value,
+              style: AppTextStyle.textStyle(
+                responsive.sp(32),
+                isSelected
+                    ? Colors.white
+                    : isEnabled
+                        ? AppColors.blackText
+                        : AppColors.greyText,
+                FontWeight.w600,
+              ),
+            ),
           ),
-        ),
+          // Diagonal line for disabled state
+          if (!isEnabled)
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _DiagonalLinePainter(
+                  color: Colors.red.withOpacity(0.7),
+                  strokeWidth: 2.0,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -483,7 +525,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         ),
                         SizedBox(height: responsive.hp(15)),
                         Text(
-                          'Processing...',
+                          widget.product.isFavorite == true
+                              ? 'Removing item from favorites...'
+                              : 'Adding items to favorites...',
                           style: AppTextStyle.textStyle(
                             responsive.sp(32),
                             AppColors.blackText,
@@ -591,6 +635,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             child: CarouselSlider(
               items: _currentImages.map((imgUrl) {
                 return Container(
+                  width: double.infinity,
                   margin: EdgeInsets.symmetric(
                     horizontal: responsive.wp(10),
                     vertical: responsive.hp(20),
@@ -688,6 +733,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   Widget _buildEnhancedProductDetails(Responsive responsive) {
+    final stock = _selectedVariant.stock;
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
@@ -734,16 +780,17 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               );
             }),
             // Price Section with enhanced styling
+
             _buildEnhancedPriceSection(responsive),
 
             SizedBox(height: responsive.hp(25)),
 
             // Stock Section with enhanced styling
-            _buildEnhancedStockSection(responsive),
+            if (stock < 20) _buildEnhancedStockSection(responsive),
 
-            SizedBox(height: responsive.hp(25)),
+            SizedBox(height: responsive.hp(10)),
 
-            SizedBox(height: responsive.hp(25)),
+            // SizedBox(height: responsive.hp(25)),
 
             // Enhanced Description Section
             _buildEnhancedDescriptionSection(responsive),
@@ -776,7 +823,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   Colors.red.withOpacity(0.1),
                   Colors.red.withOpacity(0.05),
                 ]
-              : stock <= 5
+              : stock <= 20
                   ? [
                       Colors.orange.withOpacity(0.1),
                       Colors.orange.withOpacity(0.05),
@@ -790,7 +837,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         border: Border.all(
           color: isOutOfStock
               ? Colors.red.withOpacity(0.3)
-              : stock <= 5
+              : stock <= 20
                   ? Colors.orange.withOpacity(0.3)
                   : Colors.green.withOpacity(0.3),
           width: 1.5,
@@ -814,14 +861,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               Text(
                 isOutOfStock
                     ? "Out of Stock"
-                    : stock <= 5
+                    : stock <= 20
                         ? "Low Stock ($stock left)"
                         : "$stock Available",
                 style: AppTextStyle.textStyle(
                   responsive.sp(38),
                   isOutOfStock
                       ? Colors.red
-                      : stock <= 5
+                      : stock <= 20
                           ? Colors.orange
                           : Colors.green,
                   FontWeight.w700,
@@ -834,7 +881,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             decoration: BoxDecoration(
               color: isOutOfStock
                   ? Colors.red.withOpacity(0.2)
-                  : stock <= 5
+                  : stock <= 20
                       ? Colors.orange.withOpacity(0.2)
                       : Colors.green.withOpacity(0.2),
               borderRadius: BorderRadius.circular(15),
@@ -842,12 +889,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             child: Icon(
               isOutOfStock
                   ? Icons.inventory_2_outlined
-                  : stock <= 5
+                  : stock <= 20
                       ? Icons.warning_rounded
                       : Icons.check_circle_rounded,
               color: isOutOfStock
                   ? Colors.red
-                  : stock <= 5
+                  : stock <= 20
                       ? Colors.orange
                       : Colors.green,
               size: responsive.sp(50),
@@ -893,7 +940,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ),
               SizedBox(height: responsive.hp(5)),
               Text(
-                "\$${widget.product.sellingPrice.toStringAsFixed(2)}",
+                "\$${widget.product.sellingPrice.toStringAsFixed(0)}",
                 style: AppTextStyle.textStyle(
                   responsive.sp(50),
                   AppColors.primary,
@@ -946,17 +993,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               itemBuilder: (context, index) {
                 final value = availableValues[index];
                 final isSelected = _selectedAttributes[attributeName] == value;
+                final isEnabled =
+                    _isAttributeValueAvailable(attributeName, value);
                 final shouldRenderAsColor =
                     _shouldRenderAsColor(attributeName, value);
 
                 return GestureDetector(
-                  onTap: () => _updateVariant(
-                    attributeName: attributeName,
-                    value: value,
-                  ),
+                  onTap: isEnabled
+                      ? () => _updateVariant(
+                            attributeName: attributeName,
+                            value: value,
+                          )
+                      : null, // Disable tap for unavailable options
                   child: shouldRenderAsColor
-                      ? _buildEnhancedColorWidget(value, isSelected, responsive)
-                      : _buildEnhancedTextWidget(value, isSelected, responsive),
+                      ? _buildEnhancedColorWidget(
+                          value, isSelected, isEnabled, responsive)
+                      : _buildEnhancedTextWidget(
+                          value, isSelected, isEnabled, responsive),
                 );
               },
             ),
@@ -1046,6 +1099,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   widget.product.sellingPrice,
                   widget.product.thumbnail,
                   widget.product.id,
+                  _selectedVariant.stock ?? 0,
                   _selectedVariant.id,
                   context,
                   variantImage: _selectedVariant.images.isNotEmpty
@@ -1135,5 +1189,36 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         ),
       ),
     );
+  }
+}
+
+// Custom painter for diagonal line on disabled options
+class _DiagonalLinePainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+
+  _DiagonalLinePainter({
+    required this.color,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    // Draw diagonal line from top-left to bottom-right
+    canvas.drawLine(
+      const Offset(0, 0),
+      Offset(size.width, size.height),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_DiagonalLinePainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.strokeWidth != strokeWidth;
   }
 }

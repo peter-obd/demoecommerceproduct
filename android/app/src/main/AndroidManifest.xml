@@ -1,11 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-
+   <uses-permission android:name="android.android.permission.INTERNET"/>
     <application
-        android:label="demoecommerceproduct"
+        android:label="One Dollar App"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        android:networkSecurityConfig="@xml/network_security_config"
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -43,6 +44,25 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+
+        <!-- Query for WhatsApp -->
+        <package android:name="com.whatsapp" />
+
+        <!-- Query for phone dialer -->
+        <intent>
+            <action android:name="android.intent.action.DIAL" />
+        </intent>
+
+        <!-- Query for viewing URLs -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
         </intent>
     </queries>
 </manifest>

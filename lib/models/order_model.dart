@@ -1,7 +1,7 @@
 import 'package:demoecommerceproduct/models/product/product_model.dart';
 
 class OrderModel {
-  List<ProductItem>? orderItems;
+  List<OrderItem>? orderItems;
   String? id;
   String? userId;
   // List<dynamic>? statuses;
@@ -36,8 +36,8 @@ class OrderModel {
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
       orderItems: json['orderItems'] != null
-          ? List<ProductItem>.from(
-              json['orderItems'].map((x) => ProductItem.fromJson(x, false)))
+          ? List<OrderItem>.from(
+              json['orderItems'].map((x) => OrderItem.fromJson(x)))
           : [],
       id: json['id'] ?? "",
       userId: json['userId'] ?? "",
@@ -74,6 +74,69 @@ class OrderModel {
       "couponCode": couponCode,
       "createdAt": createdAt,
       "updatedAt": updatedAt,
+    };
+  }
+}
+
+class OrderItem {
+  final String? id;
+  final String? orderId;
+  final String? productId;
+  final String? variantId;
+  final String? productName;
+  final String? variantName;
+  final int? quantity;
+  final double? unitPrice;
+  final double? discountedPrice;
+  final String? createdAt;
+  final String? updatedAt;
+
+  OrderItem({
+    this.id,
+    this.orderId,
+    this.productId,
+    this.variantId,
+    this.productName,
+    this.variantName,
+    this.quantity,
+    this.unitPrice,
+    this.discountedPrice,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory OrderItem.fromJson(Map<String, dynamic> json) {
+    return OrderItem(
+      id: json['id'] ?? "",
+      orderId: json['orderId'] ?? "",
+      productId: json['productId'] ?? "",
+      variantId: json['variantId'] ?? "",
+      productName: json['productName'] ?? "",
+      variantName: json['variantName'] ?? "",
+      quantity: json['quantity'] ?? 0,
+      unitPrice:
+          (json['unitPrice'] != null) ? json['unitPrice'].toDouble() : 0.0,
+      discountedPrice: (json['discountedPrice'] != null)
+          ? json['discountedPrice'].toDouble()
+          : 0.0,
+      createdAt: json['createdAt'] ?? "",
+      updatedAt: json['updatedAt'] ?? "",
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'orderId': orderId,
+      'productId': productId,
+      'variantId': variantId,
+      'productName': productName,
+      'variantName': variantName,
+      'quantity': quantity,
+      'unitPrice': unitPrice,
+      'discountedPrice': discountedPrice,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
     };
   }
 }

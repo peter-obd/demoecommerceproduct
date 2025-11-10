@@ -1,4 +1,5 @@
 import 'package:demoecommerceproduct/controllers/basket_controller.dart';
+import 'package:demoecommerceproduct/screens/checkout_screen.dart';
 import 'package:demoecommerceproduct/screens/search_screen.dart';
 import 'package:demoecommerceproduct/services/basket_service.dart';
 import 'package:demoecommerceproduct/values/colors.dart';
@@ -277,7 +278,7 @@ class _BasketPageState extends State<BasketPage> {
               ),
             ),
             Text(
-              '\$${controller.total.toStringAsFixed(2)}',
+              '\$${controller.total.toStringAsFixed(0)}',
               style: AppTextStyle.textStyle(
                 responsive.sp(35),
                 AppColors.blackText,
@@ -393,8 +394,12 @@ class _BasketPageState extends State<BasketPage> {
       ),
       child: ElevatedButton(
         onPressed: () {
-          // Handle checkout
-          controller.checkoutOrder(context);
+          // Navigate to checkout screen
+          Get.to(() => CheckoutScreen(
+                items: controller.products,
+                subtotal: controller.total,
+                deliveryCharge: 0.0,
+              ));
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
@@ -498,7 +503,7 @@ class _BasketPageState extends State<BasketPage> {
               ],
             ),
             child: ElevatedButton(
-              onPressed: () => Get.to(() => SearchScreen())?.then(
+              onPressed: () => Get.to(() => const SearchScreen())?.then(
                 (result) {
                   if (result == true) {
                     controller.getCheckoutProducts();
@@ -608,6 +613,7 @@ class CheckoutProduct {
   late String name;
   late double price;
   late int quantity;
+  int? stock;
   String? variantId;
   DateTime? createdAt;
   DateTime? updatedAt;
@@ -617,6 +623,7 @@ class CheckoutProduct {
     required this.imageUrl,
     required this.name,
     required this.price,
+    required this.stock,
     this.quantity = 1,
     this.variantId,
     DateTime? createdAt,
@@ -634,23 +641,6 @@ class CheckoutProduct {
         createdAt = DateTime.now(),
         updatedAt = DateTime.now();
 
-  factory CheckoutProduct.fromJson(Map<String, dynamic> json) {
-    return CheckoutProduct(
-      productId: json['productId'] ?? '',
-      imageUrl: json['imageUrl'] ?? '',
-      name: json['name'] ?? '',
-      price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      quantity: json['quantity'] ?? 1,
-      variantId: json['variantId'],
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
-          : DateTime.now(),
-    );
-  }
-
   Map<String, dynamic> toJson() => {
         'productId': productId,
         'imageUrl': imageUrl,
@@ -667,6 +657,7 @@ class CheckoutProduct {
     String? imageUrl,
     String? name,
     double? price,
+    int? stock,
     int? quantity,
     String? variantId,
     DateTime? updatedAt,
@@ -676,6 +667,7 @@ class CheckoutProduct {
       imageUrl: imageUrl ?? this.imageUrl,
       name: name ?? this.name,
       price: price ?? this.price,
+      stock: stock ?? this.stock,
       quantity: quantity ?? this.quantity,
       variantId: variantId ?? this.variantId,
       createdAt: createdAt,
@@ -803,7 +795,7 @@ class _EnhancedProductCardState extends State<EnhancedProductCard> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          "\$${widget.product.price.toStringAsFixed(2)}",
+                          "\$${widget.product.price.toStringAsFixed(0)}",
                           style: AppTextStyle.textStyle(
                             responsive.sp(35),
                             AppColors.primary,
@@ -978,7 +970,7 @@ class _ProductCardState extends State<ProductCard> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: responsive.hp(3)),
-                    Text("\$${widget.product.price.toStringAsFixed(2)}",
+                    Text("\$${widget.product.price.toStringAsFixed(0)}",
                         style: AppTextStyle.textStyle(
                           responsive.sp(30),
                           AppColors.primary,

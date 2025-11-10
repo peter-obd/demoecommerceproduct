@@ -440,7 +440,7 @@ class _LoginFormState extends State<LoginForm> {
         // SizedBox(height: responsive.hp(2)),
         GestureDetector(
           onTap: () {
-            Get.off(SignupScreen());
+            Get.to(SignupScreen());
           },
           child: Container(
             width: double.infinity,

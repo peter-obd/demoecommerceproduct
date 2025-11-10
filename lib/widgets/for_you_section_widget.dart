@@ -76,23 +76,39 @@ class _ForYouSectionWidgetState extends State<ForYouSectionWidget> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: products.length +
-                (controller.isForYouLoadingMore.value ? 1 : 0),
+            itemCount: products.length,
             itemBuilder: (context, index) {
-              if (index == products.length) {
-                // Loading indicator at the bottom
-                return const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
-                    ),
-                  ),
-                );
-              }
               return _buildForYouProductCard(products[index], context, index);
             },
           ),
+          // Loading indicator at the bottom (same style as see_more_screen)
+          if (controller.isForYouLoadingMore.value)
+            Container(
+              padding: EdgeInsets.only(
+                left: responsive.wp(20),
+                right: responsive.wp(20),
+                top: responsive.hp(20),
+                bottom: responsive.hp(20) + MediaQuery.of(context).padding.bottom,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(
+                    color: AppColors.primary,
+                    strokeWidth: 2,
+                  ),
+                  SizedBox(width: responsive.wp(15)),
+                  Text(
+                    'Loading more products...',
+                    style: AppTextStyle.textStyle(
+                      responsive.sp(32),
+                      AppColors.greyText,
+                      FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       );
     });

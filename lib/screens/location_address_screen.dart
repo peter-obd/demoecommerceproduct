@@ -794,254 +794,259 @@ class _AddressInputDialogState extends State<AddressInputDialog> {
   @override
   Widget build(BuildContext context) {
     var responsive = Responsive(context);
-    return Dialog(
-      backgroundColor: AppColors.secondary,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(responsive.wp(40)),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Add Address Details',
-              style: AppTextStyle.textStyle(
-                responsive.sp(40),
-                AppColors.blackText,
-                FontWeight.w600,
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Dialog(
+        backgroundColor: AppColors.secondary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(responsive.wp(40)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Add Address Details',
+                style: AppTextStyle.textStyle(
+                  responsive.sp(40),
+                  AppColors.blackText,
+                  FontWeight.w600,
+                ),
               ),
-            ),
-            SizedBox(height: responsive.hp(20)),
-            Container(
-              padding: EdgeInsets.all(responsive.wp(20)),
-              decoration: BoxDecoration(
-                color: AppColors.greyBackground,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Current Location:',
-                    style: AppTextStyle.textStyle(
-                      responsive.sp(26),
-                      AppColors.greyText,
-                      FontWeight.w500,
+              SizedBox(height: responsive.hp(20)),
+              Container(
+                padding: EdgeInsets.all(responsive.wp(20)),
+                decoration: BoxDecoration(
+                  color: AppColors.greyBackground,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Current Location:',
+                      style: AppTextStyle.textStyle(
+                        responsive.sp(26),
+                        AppColors.greyText,
+                        FontWeight.w500,
+                      ),
                     ),
+                    SizedBox(height: responsive.hp(8)),
+                    Text(
+                      widget.currentAddress,
+                      style: AppTextStyle.textStyle(
+                        responsive.sp(28),
+                        AppColors.blackText,
+                        FontWeight.w400,
+                      ),
+                    ),
+                    SizedBox(height: responsive.hp(5)),
+                    Text(
+                      '${widget.latitude.toStringAsFixed(4)}, ${widget.longitude.toStringAsFixed(4)}',
+                      style: AppTextStyle.textStyle(
+                        responsive.sp(24),
+                        AppColors.greyText,
+                        FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: responsive.hp(30)),
+              // Text(
+              //   'Address Title',
+              //   style: AppTextStyle.textStyle(
+              //     responsive.sp(30),
+              //     AppColors.blackText,
+              //     FontWeight.w500,
+              //   ),
+              // ),
+              // SizedBox(height: responsive.hp(10)),
+              // TextField(
+              //   controller: _titleController,
+              //   decoration: InputDecoration(
+              //     hintText: 'e.g., Home, Work, Office',
+              //     hintStyle: AppTextStyle.textStyle(
+              //       responsive.sp(28),
+              //       AppColors.greyText,
+              //       FontWeight.w400,
+              //     ),
+              //     contentPadding: EdgeInsets.symmetric(
+              //       horizontal: responsive.wp(20),
+              //       vertical: responsive.hp(15),
+              //     ),
+              //     border: OutlineInputBorder(
+              //       borderRadius: BorderRadius.circular(8),
+              //       borderSide: BorderSide(color: AppColors.greyText),
+              //     ),
+              //     enabledBorder: OutlineInputBorder(
+              //       borderRadius: BorderRadius.circular(8),
+              //       borderSide: BorderSide(color: AppColors.greyText),
+              //     ),
+              //     focusedBorder: OutlineInputBorder(
+              //       borderRadius: BorderRadius.circular(8),
+              //       borderSide: BorderSide(color: AppColors.primary, width: 2),
+              //     ),
+              //   ),
+              //   style: AppTextStyle.textStyle(
+              //     responsive.sp(28),
+              //     AppColors.blackText,
+              //     FontWeight.w400,
+              //   ),
+              // ),
+              // SizedBox(height: responsive.hp(20)),
+              Text(
+                'Detailed Description',
+                style: AppTextStyle.textStyle(
+                  responsive.sp(30),
+                  AppColors.blackText,
+                  FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: responsive.hp(10)),
+              TextField(
+                controller: _descriptionController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText:
+                      'Building name, floor, apartment number, nearby landmarks...',
+                  hintStyle: AppTextStyle.textStyle(
+                    responsive.sp(28),
+                    AppColors.greyText,
+                    FontWeight.w400,
                   ),
-                  SizedBox(height: responsive.hp(8)),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: responsive.wp(20),
+                    vertical: responsive.hp(15),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.greyText),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.greyText),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.primary, width: 2),
+                  ),
+                ),
+                style: AppTextStyle.textStyle(
+                  responsive.sp(28),
+                  AppColors.blackText,
+                  FontWeight.w400,
+                ),
+              ),
+              SizedBox(height: responsive.hp(20)),
+              Row(
+                children: [
+                  Checkbox(
+                    value: _isDefault,
+                    onChanged: (value) {
+                      setState(() {
+                        _isDefault = value ?? false;
+                      });
+                    },
+                    activeColor: AppColors.primary,
+                  ),
+                  SizedBox(width: responsive.wp(10)),
                   Text(
-                    widget.currentAddress,
+                    'Set as default address',
                     style: AppTextStyle.textStyle(
                       responsive.sp(28),
                       AppColors.blackText,
                       FontWeight.w400,
                     ),
                   ),
-                  SizedBox(height: responsive.hp(5)),
-                  Text(
-                    '${widget.latitude.toStringAsFixed(4)}, ${widget.longitude.toStringAsFixed(4)}',
-                    style: AppTextStyle.textStyle(
-                      responsive.sp(24),
-                      AppColors.greyText,
-                      FontWeight.w400,
+                ],
+              ),
+              SizedBox(height: responsive.hp(30)),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: responsive.hp(45),
+                      child: ElevatedButton(
+                        onPressed:
+                            _loading ? null : () => Navigator.of(context).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.greyBackground,
+                          foregroundColor: AppColors.blackText,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: AppTextStyle.textStyle(
+                            responsive.sp(30),
+                            AppColors.blackText,
+                            FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: responsive.wp(15)),
+                  Expanded(
+                    child: SizedBox(
+                      height: responsive.hp(45),
+                      child: ElevatedButton(
+                        onPressed: _loading ? null : _saveAddress,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.secondary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: _loading
+                            ? SizedBox(
+                                width: responsive.wp(40),
+                                height: responsive.wp(40),
+                                child: CircularProgressIndicator(
+                                  color: AppColors.secondary,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                'Save',
+                                style: AppTextStyle.textStyle(
+                                  responsive.sp(30),
+                                  AppColors.secondary,
+                                  FontWeight.w600,
+                                ),
+                              ),
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-            SizedBox(height: responsive.hp(30)),
-            Text(
-              'Address Title',
-              style: AppTextStyle.textStyle(
-                responsive.sp(30),
-                AppColors.blackText,
-                FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: responsive.hp(10)),
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                hintText: 'e.g., Home, Work, Office',
-                hintStyle: AppTextStyle.textStyle(
-                  responsive.sp(28),
-                  AppColors.greyText,
-                  FontWeight.w400,
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: responsive.wp(20),
-                  vertical: responsive.hp(15),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.greyText),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.greyText),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.primary, width: 2),
-                ),
-              ),
-              style: AppTextStyle.textStyle(
-                responsive.sp(28),
-                AppColors.blackText,
-                FontWeight.w400,
-              ),
-            ),
-            SizedBox(height: responsive.hp(20)),
-            Text(
-              'Detailed Description',
-              style: AppTextStyle.textStyle(
-                responsive.sp(30),
-                AppColors.blackText,
-                FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: responsive.hp(10)),
-            TextField(
-              controller: _descriptionController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText:
-                    'Building name, floor, apartment number, nearby landmarks...',
-                hintStyle: AppTextStyle.textStyle(
-                  responsive.sp(28),
-                  AppColors.greyText,
-                  FontWeight.w400,
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: responsive.wp(20),
-                  vertical: responsive.hp(15),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.greyText),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.greyText),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.primary, width: 2),
-                ),
-              ),
-              style: AppTextStyle.textStyle(
-                responsive.sp(28),
-                AppColors.blackText,
-                FontWeight.w400,
-              ),
-            ),
-            SizedBox(height: responsive.hp(20)),
-            Row(
-              children: [
-                Checkbox(
-                  value: _isDefault,
-                  onChanged: (value) {
-                    setState(() {
-                      _isDefault = value ?? false;
-                    });
-                  },
-                  activeColor: AppColors.primary,
-                ),
-                SizedBox(width: responsive.wp(10)),
-                Text(
-                  'Set as default address',
-                  style: AppTextStyle.textStyle(
-                    responsive.sp(28),
-                    AppColors.blackText,
-                    FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: responsive.hp(30)),
-            Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: responsive.hp(45),
-                    child: ElevatedButton(
-                      onPressed:
-                          _loading ? null : () => Navigator.of(context).pop(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.greyBackground,
-                        foregroundColor: AppColors.blackText,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        'Cancel',
-                        style: AppTextStyle.textStyle(
-                          responsive.sp(30),
-                          AppColors.blackText,
-                          FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: responsive.wp(15)),
-                Expanded(
-                  child: SizedBox(
-                    height: responsive.hp(45),
-                    child: ElevatedButton(
-                      onPressed: _loading ? null : _saveAddress,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.secondary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: _loading
-                          ? SizedBox(
-                              width: responsive.wp(40),
-                              height: responsive.wp(40),
-                              child: CircularProgressIndicator(
-                                color: AppColors.secondary,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              'Save Address',
-                              style: AppTextStyle.textStyle(
-                                responsive.sp(30),
-                                AppColors.secondary,
-                                FontWeight.w600,
-                              ),
-                            ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   void _saveAddress() {
-    if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please enter an address title'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
+    // if (_titleController.text.trim().isEmpty) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(
+    //       content: const Text('Please enter an address title'),
+    //       backgroundColor: Colors.red,
+    //       behavior: SnackBarBehavior.floating,
+    //     ),
+    //   );
+    //   return;
+    // }
 
     if (_descriptionController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1055,7 +1060,7 @@ class _AddressInputDialogState extends State<AddressInputDialog> {
     }
 
     final result = AddressInputResult(
-      title: _titleController.text.trim(),
+      title: widget.currentAddress,
       description: _descriptionController.text.trim(),
       isDefault: _isDefault,
     );

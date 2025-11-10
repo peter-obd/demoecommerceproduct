@@ -658,7 +658,7 @@ class _SignupFormState extends State<SignupForm> {
         ),
         GestureDetector(
           onTap: () {
-            Get.off(LoginScreen());
+            Get.back();
           },
           child: Container(
             width: double.infinity,

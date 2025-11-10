@@ -802,40 +802,40 @@ class EnhancedSearchProductCard extends StatelessWidget {
                         ),
                       ),
                       // Add to Cart Button
-                      GestureDetector(
-                        onTap: () async {
-                          await BasketService.instance
-                              .addToBasket(CheckoutProduct(
-                                  productId: product.id,
-                                  imageUrl: product.thumbnail ?? "",
-                                  name: product.name,
-                                  price: product.sellingPrice))
-                              .then((onValue) {
-                            Utils.showFlushbarSuccess(
-                                context, "Item added to Basket");
-                          });
-                          ;
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(responsive.wp(10)),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.add_shopping_cart_rounded,
-                            color: Colors.white,
-                            size: responsive.sp(35),
-                          ),
-                        ),
-                      ),
+                      // GestureDetector(
+                      //   onTap: () async {
+                      //     await BasketService.instance
+                      //         .addToBasket(CheckoutProduct(
+                      //             productId: product.id,
+                      //             imageUrl: product.thumbnail ?? "",
+                      //             name: product.name,
+                      //             price: product.sellingPrice))
+                      //         .then((onValue) {
+                      //       Utils.showFlushbarSuccess(
+                      //           context, "Item added to Basket");
+                      //     });
+                      //     ;
+                      //   },
+                      //   child: Container(
+                      //     padding: EdgeInsets.all(responsive.wp(10)),
+                      //     decoration: BoxDecoration(
+                      //       color: AppColors.primary,
+                      //       borderRadius: BorderRadius.circular(12),
+                      //       boxShadow: [
+                      //         BoxShadow(
+                      //           color: AppColors.primary.withOpacity(0.3),
+                      //           blurRadius: 8,
+                      //           offset: const Offset(0, 3),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //     child: Icon(
+                      //       Icons.add_shopping_cart_rounded,
+                      //       color: Colors.white,
+                      //       size: responsive.sp(35),
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ],

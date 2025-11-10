@@ -127,6 +127,7 @@ class Utils {
                   FontWeight.w400,
                 ),
               ),
+              const SizedBox(height: 70),
               if (showButton)
                 Column(
                   children: [

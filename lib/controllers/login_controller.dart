@@ -1,3 +1,4 @@
+import 'package:demoecommerceproduct/controllers/welcome_controller.dart';
 import 'package:demoecommerceproduct/models/category_model.dart';
 import 'package:demoecommerceproduct/models/product/product_model.dart';
 import 'package:demoecommerceproduct/screens/home_screen.dart';
@@ -14,8 +15,10 @@ class LoginController extends GetxController {
   var categories = <Category>[].obs;
 
   var productsOfCategory = <ProductItem>[].obs;
-
+  // final WelcomeController welcomeController = Get.put(WelcomeController());
+  final WelcomeController welcomeController = Get.find<WelcomeController>();
   void getCategories(BuildContext context) {
+    welcomeController.isNavigated.value = true;
     IsarService.instance.clearDatabase();
     ApisService.getAllCategories((success) {
       categories.value = success;
@@ -23,6 +26,7 @@ class LoginController extends GetxController {
 
       getProductsByCategory(categories[0].id, "6", "1", context);
     }, (fail) {
+      welcomeController.isNavigated.value = false;
       isLoading.value = false;
     });
   }
@@ -50,9 +54,12 @@ class LoginController extends GetxController {
         (res) {
       productsOfCategory.value = res.items;
       isLoading.value = false;
+      welcomeController.isNavigated.value = false;
       Get.offAll(HomeScreen());
     }, (fail) {
       isLoading.value = false;
+
+      welcomeController.isNavigated.value = false;
       Utils.showFlushbarError(context, "Please try again!!");
     });
   }

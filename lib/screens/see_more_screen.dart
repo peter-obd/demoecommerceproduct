@@ -219,8 +219,14 @@ class _SeeMoreScreenState extends State<SeeMoreScreen> {
                         category.id == controller.selectedCategoryId.value;
 
                     return GestureDetector(
-                      onTap: () => controller.getProductsByCategory(
-                          category.id, "6", "1"),
+                      onTap: () {
+                        if (controller.isScrollLoading.value == false) {
+                          controller.getProductsByCategory(
+                              category.id, "6", "1");
+                        } else {
+                          return;
+                        }
+                      },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
@@ -240,16 +246,16 @@ class _SeeMoreScreenState extends State<SeeMoreScreen> {
                                 : AppColors.greyShadow.withOpacity(0.3),
                             width: 1.5,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: isSelected
-                                  ? AppColors.primary.withOpacity(0.3)
-                                  : Colors.black.withOpacity(0.05),
-                              blurRadius: isSelected ? 12 : 6,
-                              offset: Offset(0, isSelected ? 4 : 2),
-                              spreadRadius: isSelected ? 0.5 : 0,
-                            ),
-                          ],
+                          // boxShadow: [
+                          //   BoxShadow(
+                          //     color: isSelected
+                          //         ? AppColors.primary.withOpacity(0.3)
+                          //         : Colors.black.withOpacity(0.05),
+                          //     blurRadius: isSelected ? 12 : 6,
+                          //     offset: Offset(0, isSelected ? 4 : 2),
+                          //     spreadRadius: isSelected ? 0.5 : 0,
+                          //   ),
+                          // ],
                         ),
                         child: Center(
                           child: Text(
@@ -322,7 +328,12 @@ class _SeeMoreScreenState extends State<SeeMoreScreen> {
             ),
             if (controller.isScrollLoading.value)
               Container(
-                padding: EdgeInsets.all(responsive.wp(20)),
+                padding: EdgeInsets.only(
+                  left: responsive.wp(20),
+                  right: responsive.wp(20),
+                  top: responsive.hp(20),
+                  bottom: responsive.hp(20) + MediaQuery.of(context).padding.bottom,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -660,25 +671,25 @@ class EnhancedProductCard extends StatelessWidget {
                         ),
                       ),
                       // Add to Cart Button
-                      Container(
-                        padding: EdgeInsets.all(responsive.wp(10)),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.add_shopping_cart_rounded,
-                          color: Colors.white,
-                          size: responsive.sp(35),
-                        ),
-                      ),
+                      // Container(
+                      //   padding: EdgeInsets.all(responsive.wp(10)),
+                      //   decoration: BoxDecoration(
+                      //     color: AppColors.primary,
+                      //     borderRadius: BorderRadius.circular(12),
+                      //     boxShadow: [
+                      //       BoxShadow(
+                      //         color: AppColors.primary.withOpacity(0.3),
+                      //         blurRadius: 8,
+                      //         offset: const Offset(0, 3),
+                      //       ),
+                      //     ],
+                      //   ),
+                      //   child: Icon(
+                      //     Icons.add_shopping_cart_rounded,
+                      //     color: Colors.white,
+                      //     size: responsive.sp(35),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ],

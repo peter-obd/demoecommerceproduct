@@ -108,16 +108,16 @@ class CategoriesItemsWidget extends StatelessWidget {
                               : AppColors.greyShadow.withOpacity(0.3),
                           width: 1.5,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: isSelected
-                                ? AppColors.primary.withOpacity(0.3)
-                                : Colors.black.withOpacity(0.05),
-                            blurRadius: isSelected ? 12 : 6,
-                            offset: Offset(0, isSelected ? 4 : 2),
-                            spreadRadius: isSelected ? 0.5 : 0,
-                          ),
-                        ],
+                        //boxShadow: [
+                        //   BoxShadow(
+                        //     color: isSelected
+                        //         ? AppColors.primary.withOpacity(0.3)
+                        //         : Colors.black.withOpacity(0.05),
+                        // blurRadius: isSelected ? 6 : 3,
+                        // offset: Offset(0, isSelected ? 4 : 2),
+                        // spreadRadius: isSelected ? 0.5 : 0,
+                        // ),
+                        // ],
                       ),
                       child: Center(
                         child: Text(
@@ -208,7 +208,7 @@ class CategoriesItemsWidget extends StatelessWidget {
           children: [
             // Main Card
             Padding(
-              padding: EdgeInsets.only(top: responsive.hp(70)),
+              padding: EdgeInsets.only(top: responsive.hp(50)),
               child: Container(
                 height: responsive.hp(280),
                 width: responsive.wp(200),
@@ -267,6 +267,7 @@ class CategoriesItemsWidget extends StatelessWidget {
                                 FontWeight.w400,
                               ),
                             ),
+                            SizedBox(height: responsive.hp(5)),
                             // Price with background
                             Container(
                               padding: EdgeInsets.symmetric(
@@ -302,12 +303,12 @@ class CategoriesItemsWidget extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Colors.white,
                 boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.2),
-                    blurRadius: 15,
-                    offset: const Offset(0, 5),
-                    spreadRadius: 2,
-                  ),
+                  // BoxShadow(
+                  //   color: AppColors.primary.withOpacity(0.2),
+                  //   blurRadius: 15,
+                  //   offset: const Offset(0, 5),
+                  //   spreadRadius: 1,
+                  // ),
                 ],
                 border: Border.all(
                   color: AppColors.primary.withOpacity(0.1),

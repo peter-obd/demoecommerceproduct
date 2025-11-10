@@ -22,6 +22,7 @@ typedef OrdersHistorySuccess = Function(List<OrderModel> orders);
 typedef UserAddressesSuccess = Function(List<UserAddress> addresses);
 typedef SetDefaultAddressSuccess = Function(UserAddress updatedAddress);
 typedef GetDefaultAddressSuccess = Function(UserAddress? defaultAddress);
+typedef ProductByIdSuccess = Function(ProductItem productData);
 
 class ApisService {
   static const String _baseUrl = "https://onedollarapp.onrender.com/";
@@ -217,7 +218,8 @@ class ApisService {
     }, (error) => fail(error));
   }
 
-  static void setDefaultAddress(String addressId, SetDefaultAddressSuccess success, RequestFail fail) {
+  static void setDefaultAddress(
+      String addressId, SetDefaultAddressSuccess success, RequestFail fail) {
     var urlMethod = "UserAddress/set-default-address/$addressId";
     var url = _baseUrl + _urlPath + urlMethod;
 
@@ -229,12 +231,14 @@ class ApisService {
           success(updatedAddress);
         }
       } catch (e) {
-        debugPrint("Could not parse set default address response: ${e.toString()}");
+        debugPrint(
+            "Could not parse set default address response: ${e.toString()}");
       }
     }, (error) => fail(error));
   }
 
-  static void getDefaultAddress(GetDefaultAddressSuccess success, RequestFail fail) {
+  static void getDefaultAddress(
+      GetDefaultAddressSuccess success, RequestFail fail) {
     var urlMethod = "UserAddress/get-default-address";
     var url = _baseUrl + _urlPath + urlMethod;
 
@@ -248,7 +252,8 @@ class ApisService {
           success(null);
         }
       } catch (e) {
-        debugPrint("Could not parse get default address response: ${e.toString()}");
+        debugPrint(
+            "Could not parse get default address response: ${e.toString()}");
         success(null);
       }
     }, (error) {
@@ -259,6 +264,7 @@ class ApisService {
 
   static void checkoutOrder(
       String couponCode,
+      String addressId,
       List<OnCheckoutOrderProductModel> products,
       RequestSuccess success,
       RequestFail fail) {
@@ -266,6 +272,7 @@ class ApisService {
     var url = _baseUrl + _urlPath + urlMethod;
     var params = {
       "couponCode": couponCode,
+      "addressId": addressId,
       "orderItems": products.map((p) => p.toJson()).toList(),
     };
 
@@ -283,7 +290,7 @@ class ApisService {
 
   static void getOrdersHistory(OrdersHistorySuccess success, RequestFail fail) {
     String urlMethod =
-        'Order/get-orders-by-user-with-details-paginated?pageNumber=1&pageSize=1000&sortDescending=true';
+        'Order/get-orders-by-user-with-details-paginated?pageNumber=1&pageSize=10000'; //&sortDescending=false
     var url = _baseUrl + _urlPath + urlMethod;
 
     AppRequestManager.getWithToken(url, null, null, true, (response) {
@@ -363,6 +370,23 @@ class ApisService {
         await IsarService.instance.saveMultipleProducts(products);
 
         success(products);
+      } catch (e) {
+        debugPrint("Could not parse  : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void getProductByProductId(
+      String productId, ProductByIdSuccess success, RequestFail fail) {
+    var urlMethod = "Product/get-by-id-with-details/$productId";
+    var url = _baseUrl + _urlPath + urlMethod;
+
+    AppRequestManager.getWithToken(url, null, null, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        var data = result['data'];
+        ProductItem product = ProductItem.fromJson(data, false);
+        success(product);
       } catch (e) {
         debugPrint("Could not parse  : ${e.toString()}");
       }

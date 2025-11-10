@@ -86,11 +86,11 @@ class _ManageAddressesScreenState extends State<ManageAddressesScreen> {
         searchCountryCodes: 'lb,ae,sa',
       ),
     );
-    
+
     if (result != null) {
       // Reload addresses list
       await _loadAddresses();
-      
+
       // Refresh the profile controller to update default address
       try {
         final profileController = Get.find<ProfileController>();
@@ -276,12 +276,22 @@ class _ManageAddressesScreenState extends State<ManageAddressesScreen> {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            address.title,
-                            style: AppTextStyle.textStyle(
-                              responsive.sp(36),
-                              AppColors.blackText,
-                              FontWeight.w600,
+                          SizedBox(
+                            width: address.isDefault
+                                ? responsive.wp(115)
+                                : responsive.wp(160),
+                            // height: responsive.hp(40),
+                            child: Text(
+                              address.title,
+                              maxLines: address.isDefault ? 4 : 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyle.textStyle(
+                                address.isDefault
+                                    ? responsive.sp(30)
+                                    : responsive.sp(36),
+                                AppColors.blackText,
+                                FontWeight.w600,
+                              ),
                             ),
                           ),
                           if (address.isDefault) ...[
@@ -389,7 +399,7 @@ class _ManageAddressesScreenState extends State<ManageAddressesScreen> {
               address: updatedAddress.description,
             );
             await LocationStorageService.saveLocation(location);
-            
+
             // Show success message
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -398,10 +408,10 @@ class _ManageAddressesScreenState extends State<ManageAddressesScreen> {
                 behavior: SnackBarBehavior.floating,
               ),
             );
-            
+
             // Reload addresses to update the UI
             await _loadAddresses();
-            
+
             // Refresh the profile controller
             final profileController = Get.find<ProfileController>();
             profileController.refreshDefaultAddress();

@@ -177,7 +177,7 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   child: Icon(
-                    Icons.message_outlined,
+                    Icons.help_outline_outlined,
                     color: AppColors.primary,
                     size: responsive.sp(50),
                   ),

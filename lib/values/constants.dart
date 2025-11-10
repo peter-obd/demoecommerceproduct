@@ -16,7 +16,7 @@ class AppTextStyle {
 
   static TextStyle textStyle(
       double fontSize, Color color, FontWeight fontWeight) {
-    return GoogleFonts.raleway(
+    return GoogleFonts.lato(
       fontWeight: fontWeight,
       fontSize: fontSize,
       color: color,

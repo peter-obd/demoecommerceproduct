@@ -1,4 +1,5 @@
 import 'package:demoecommerceproduct/models/order_model.dart';
+import 'package:demoecommerceproduct/screens/order_details_screen.dart';
 import 'package:demoecommerceproduct/services/apis_service.dart';
 import 'package:demoecommerceproduct/values/colors.dart';
 import 'package:demoecommerceproduct/values/constants.dart';
@@ -73,10 +74,50 @@ class _OdersScreenState extends State<OdersScreen> {
     return isLoading
         ? Container(
             color: Colors.white,
-            child: const Center(
-                child: CircularProgressIndicator(
-              color: AppColors.primary,
-            )))
+            child: Center(
+              child: Container(
+                padding: EdgeInsets.all(responsive.wp(40)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 15,
+                      spreadRadius: 3,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(
+                      color: AppColors.primary,
+                      strokeWidth: 3,
+                    ),
+                    SizedBox(height: responsive.hp(20)),
+                    Text(
+                      'Loading Your Orders',
+                      style: AppTextStyle.textStyle(
+                        responsive.sp(40),
+                        AppColors.blackText,
+                        FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: responsive.hp(8)),
+                    Text(
+                      'Please wait...',
+                      style: AppTextStyle.textStyle(
+                        responsive.sp(32),
+                        AppColors.greyText,
+                        FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )
         : Scaffold(
             backgroundColor: AppColors.greyBackground,
             body: Column(
@@ -365,8 +406,7 @@ class EnhancedOrderCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // Handle order tap for details
-            _showOrderDetails(context);
+            Get.to(() => OrderDetailsScreen(order: order));
           },
           borderRadius: BorderRadius.circular(20),
           child: Padding(
@@ -414,12 +454,12 @@ class EnhancedOrderCard extends StatelessWidget {
                         vertical: responsive.hp(8),
                       ),
                       decoration: BoxDecoration(
-                        color: Colors
-                            .white, //_getStatusColor(order.status).withOpacity(0.1),
+                        color: Colors.green.withOpacity(
+                            0.1), //_getStatusColor(order.status).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: Colors
-                              .white, //_getStatusColor(order.status).withOpacity(0.3),
+                              .green, //_getStatusColor(order.status).withOpacity(0.3),
                           width: 1,
                         ),
                       ),
@@ -429,9 +469,8 @@ class EnhancedOrderCard extends StatelessWidget {
                           Container(
                             width: responsive.wp(8),
                             height: responsive.wp(8),
-                            decoration: BoxDecoration(
-                              color:
-                                  Colors.white, //_getStatusColor(order.status),
+                            decoration: const BoxDecoration(
+                              color: Colors.green,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -440,7 +479,7 @@ class EnhancedOrderCard extends StatelessWidget {
                             order.currentStatus ?? "N/A",
                             style: AppTextStyle.textStyle(
                               responsive.sp(28),
-                              AppColors.primary,
+                              Colors.green,
                               //  _getStatusColor(order.status),
                               FontWeight.w600,
                             ),
@@ -513,7 +552,7 @@ class EnhancedOrderCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            "\$${order.totalSelling?.toStringAsFixed(2)}",
+                            "\$${order.totalSelling?.toStringAsFixed(0)}",
                             style: AppTextStyle.textStyle(
                               responsive.sp(35),
                               AppColors.primary,
@@ -579,131 +618,6 @@ class EnhancedOrderCard extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'delivered':
-        return Colors.green;
-      case 'shipped':
-        return Colors.blue;
-      case 'processing':
-        return Colors.orange;
-      case 'cancelled':
-        return Colors.red;
-      default:
-        return AppColors.primary;
-    }
-  }
-
-  void _showOrderDetails(BuildContext context) {
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Text(
-          'Order Details',
-          style: AppTextStyle.textStyle(
-            responsive.sp(45),
-            AppColors.blackText,
-            FontWeight.w700,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Order ID: ${order.id}',
-              style: AppTextStyle.textStyle(
-                responsive.sp(32),
-                AppColors.greyText,
-                FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: responsive.hp(10)),
-            Text(
-              'Date: ${order.createdAt ?? "N/A"}',
-              style: AppTextStyle.textStyle(
-                responsive.sp(32),
-                AppColors.greyText,
-                FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: responsive.hp(10)),
-            Text(
-              'Total: \$${order.totalSelling?.toStringAsFixed(2)}',
-              style: AppTextStyle.textStyle(
-                responsive.sp(32),
-                AppColors.primary,
-                FontWeight.w700,
-              ),
-            ),
-            SizedBox(height: responsive.hp(15)),
-            Text(
-              'Items:',
-              style: AppTextStyle.textStyle(
-                responsive.sp(35),
-                AppColors.blackText,
-                FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: responsive.hp(2)),
-            SizedBox(
-              width: responsive.wp(400),
-              height: responsive.hp(300),
-              child: ListView.builder(
-                  itemCount: order.orderItems?.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: EdgeInsets.only(top: responsive.hp(5)),
-                      child: Text(
-                        '• ${order.orderItems?[index].name} x \$${order.orderItems?[index].sellingPrice.toStringAsFixed(2)}',
-                        style: AppTextStyle.textStyle(
-                          responsive.sp(30),
-                          AppColors.greyText,
-                          FontWeight.w400,
-                        ),
-                      ),
-                    );
-                  }),
-            )
-            // ...order.orderItems!.map((item) => Padding(
-            //       padding: EdgeInsets.only(top: responsive.hp(5)),
-            //       child: Text(
-            //         '• ${item.name} x \$${item.sellingPrice.toStringAsFixed(2)}',
-            //         style: AppTextStyle.textStyle(
-            //           responsive.sp(30),
-            //           AppColors.greyText,
-            //           FontWeight.w400,
-            //         ),
-            //       ),
-            //     )
-            //  ),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Get.back(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-            ),
-            child: Text(
-              'Close',
-              style: AppTextStyle.textStyle(
-                responsive.sp(32),
-                Colors.white,
-                FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

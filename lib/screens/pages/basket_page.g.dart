@@ -47,13 +47,18 @@ const CheckoutProductSchema = CollectionSchema(
       name: r'quantity',
       type: IsarType.long,
     ),
-    r'updatedAt': PropertySchema(
+    r'stock': PropertySchema(
       id: 6,
+      name: r'stock',
+      type: IsarType.long,
+    ),
+    r'updatedAt': PropertySchema(
+      id: 7,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
     r'variantId': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'variantId',
       type: IsarType.string,
     )
@@ -121,8 +126,9 @@ void _checkoutProductSerialize(
   writer.writeDouble(offsets[3], object.price);
   writer.writeString(offsets[4], object.productId);
   writer.writeLong(offsets[5], object.quantity);
-  writer.writeDateTime(offsets[6], object.updatedAt);
-  writer.writeString(offsets[7], object.variantId);
+  writer.writeLong(offsets[6], object.stock);
+  writer.writeDateTime(offsets[7], object.updatedAt);
+  writer.writeString(offsets[8], object.variantId);
 }
 
 CheckoutProduct _checkoutProductDeserialize(
@@ -138,8 +144,9 @@ CheckoutProduct _checkoutProductDeserialize(
     price: reader.readDouble(offsets[3]),
     productId: reader.readString(offsets[4]),
     quantity: reader.readLongOrNull(offsets[5]) ?? 1,
-    updatedAt: reader.readDateTimeOrNull(offsets[6]),
-    variantId: reader.readStringOrNull(offsets[7]),
+    stock: reader.readLongOrNull(offsets[6]),
+    updatedAt: reader.readDateTimeOrNull(offsets[7]),
+    variantId: reader.readStringOrNull(offsets[8]),
   );
   object.isarId = id;
   return object;
@@ -165,8 +172,10 @@ P _checkoutProductDeserializeProp<P>(
     case 5:
       return (reader.readLongOrNull(offset) ?? 1) as P;
     case 6:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 7:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 8:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1134,6 +1143,80 @@ extension CheckoutProductQueryFilter
   }
 
   QueryBuilder<CheckoutProduct, CheckoutProduct, QAfterFilterCondition>
+      stockIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'stock',
+      ));
+    });
+  }
+
+  QueryBuilder<CheckoutProduct, CheckoutProduct, QAfterFilterCondition>
+      stockIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'stock',
+      ));
+    });
+  }
+
+  QueryBuilder<CheckoutProduct, CheckoutProduct, QAfterFilterCondition>
+      stockEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'stock',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CheckoutProduct, CheckoutProduct, QAfterFilterCondition>
+      stockGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'stock',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CheckoutProduct, CheckoutProduct, QAfterFilterCondition>
+      stockLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'stock',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<CheckoutProduct, CheckoutProduct, QAfterFilterCondition>
+      stockBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'stock',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<CheckoutProduct, CheckoutProduct, QAfterFilterCondition>
       updatedAtIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1452,6 +1535,19 @@ extension CheckoutProductQuerySortBy
     });
   }
 
+  QueryBuilder<CheckoutProduct, CheckoutProduct, QAfterSortBy> sortByStock() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'stock', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CheckoutProduct, CheckoutProduct, QAfterSortBy>
+      sortByStockDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'stock', Sort.desc);
+    });
+  }
+
   QueryBuilder<CheckoutProduct, CheckoutProduct, QAfterSortBy>
       sortByUpdatedAt() {
     return QueryBuilder.apply(this, (query) {
@@ -1578,6 +1674,19 @@ extension CheckoutProductQuerySortThenBy
     });
   }
 
+  QueryBuilder<CheckoutProduct, CheckoutProduct, QAfterSortBy> thenByStock() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'stock', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CheckoutProduct, CheckoutProduct, QAfterSortBy>
+      thenByStockDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'stock', Sort.desc);
+    });
+  }
+
   QueryBuilder<CheckoutProduct, CheckoutProduct, QAfterSortBy>
       thenByUpdatedAt() {
     return QueryBuilder.apply(this, (query) {
@@ -1650,6 +1759,12 @@ extension CheckoutProductQueryWhereDistinct
     });
   }
 
+  QueryBuilder<CheckoutProduct, CheckoutProduct, QDistinct> distinctByStock() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'stock');
+    });
+  }
+
   QueryBuilder<CheckoutProduct, CheckoutProduct, QDistinct>
       distinctByUpdatedAt() {
     return QueryBuilder.apply(this, (query) {
@@ -1707,6 +1822,12 @@ extension CheckoutProductQueryProperty
   QueryBuilder<CheckoutProduct, int, QQueryOperations> quantityProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'quantity');
+    });
+  }
+
+  QueryBuilder<CheckoutProduct, int?, QQueryOperations> stockProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'stock');
     });
   }
 

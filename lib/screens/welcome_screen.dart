@@ -51,31 +51,35 @@ class WelcomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Obx(
-                //   () => controller.isNavigated.value == false
-                //       ? const CircularProgressIndicator(
-                //           color: Colors.white,
-                //         )
-                //       :
-                GestureDetector(
-                  onTap: () {
-                    controller.navigateToLoginScreen();
-                  },
-                  child: Container(
-                    height: responsive.hp(60),
-                    width: responsive.wp(290),
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      color: AppColors.secondary,
+                Obx(() => controller.isNavigated.value == true
+                        ? const CircularProgressIndicator(
+                            color: Colors.white,
+                          )
+                        : const CircularProgressIndicator(
+                            color: Colors.white,
+                          )
+                    //  GestureDetector(
+                    //     onTap: () {
+                    //       controller.navigateToLoginScreen(context);
+                    //     },
+                    //     child: Container(
+                    //       height: responsive.hp(60),
+                    //       width: responsive.wp(290),
+                    //       decoration: const BoxDecoration(
+                    //         borderRadius:
+                    //             BorderRadius.all(Radius.circular(10)),
+                    //         color: AppColors.secondary,
+                    //       ),
+                    //       child: Center(
+                    //         child: Text("Get Started",
+                    //             style: AppTextStyle.textStyle(
+                    //                 responsive.sp(35),
+                    //                 AppColors.primary,
+                    //                 FontWeight.bold)),
+                    //       ),
+                    //     ),
+                    //   ),
                     ),
-                    child: Center(
-                      child: Text("Get Started",
-                          style: AppTextStyle.textStyle(responsive.sp(35),
-                              AppColors.primary, FontWeight.bold)),
-                    ),
-                  ),
-                ),
-                //   ),
               ],
             ),
           ),

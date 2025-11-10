@@ -39,13 +39,12 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
 
             // Enhanced Phone Number Field
             _buildPhoneNumberField(responsive),
-            
+
             SizedBox(height: responsive.hp(30)),
 
             // Enhanced Reset Button
             _buildResetPasswordButton(responsive),
 
-            
             // Enhanced Back to Login Section
             _buildBackToLoginSection(responsive),
           ],
@@ -310,7 +309,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
         ),
         GestureDetector(
           onTap: () {
-            Get.to(LoginScreen());
+            Get.back();
           },
           child: Container(
             width: double.infinity,

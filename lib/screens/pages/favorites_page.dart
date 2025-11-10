@@ -5,6 +5,7 @@ import 'package:demoecommerceproduct/screens/product_details_screen.dart';
 import 'package:demoecommerceproduct/screens/search_screen.dart';
 import 'package:demoecommerceproduct/services/apis_service.dart';
 import 'package:demoecommerceproduct/services/isar_service.dart';
+import 'package:demoecommerceproduct/utilities/Utils.dart';
 import 'package:demoecommerceproduct/values/colors.dart';
 import 'package:demoecommerceproduct/values/constants.dart';
 import 'package:demoecommerceproduct/values/responsive.dart';
@@ -46,8 +47,48 @@ class _FavoritesPageState extends State<FavoritesPage> {
           Obx(() => homeController.isFavoritesLoading.value
               ? Container(
                   color: Colors.white,
-                  child: const Center(
-                    child: CircularProgressIndicator(),
+                  child: Center(
+                    child: Container(
+                      padding: EdgeInsets.all(responsive.wp(40)),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 15,
+                            spreadRadius: 3,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(
+                            color: AppColors.primary,
+                            strokeWidth: 3,
+                          ),
+                          SizedBox(height: responsive.hp(20)),
+                          Text(
+                            'Loading Your Favorites',
+                            style: AppTextStyle.textStyle(
+                              responsive.sp(40),
+                              AppColors.blackText,
+                              FontWeight.w700,
+                            ),
+                          ),
+                          SizedBox(height: responsive.hp(8)),
+                          Text(
+                            'Please wait...',
+                            style: AppTextStyle.textStyle(
+                              responsive.sp(32),
+                              AppColors.greyText,
+                              FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 )
               : const SizedBox.shrink())
@@ -540,17 +581,30 @@ class EnhancedFavoriteCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () async {
-            await IsarService.instance
-                .getProductWithAllRelations(product.id)
-                .then((onValue) {
+          onTap: () {
+            homeController.isFavoritesLoading.value = true;
+            ApisService.getProductByProductId(product.id, (success) {
+              homeController.isFavoritesLoading.value = false;
               Get.to(() => ProductDetailsScreen(
-                  product: onValue!, isFromFavorites: true))?.then((result) {
+                  product: success, isFromFavorites: true))?.then((result) {
                 if (result == true) {
                   homeController.getFavoriteProducts();
                 }
               });
+            }, (fail) {
+              homeController.isFavoritesLoading.value = false;
+              Utils.showFlushbarError(context, fail.message);
             });
+            // await IsarService.instance
+            //     .getProductWithAllRelations(product.id)
+            //     .then((onValue) {
+            //   Get.to(() => ProductDetailsScreen(
+            //       product: onValue!, isFromFavorites: true))?.then((result) {
+            //     if (result == true) {
+            //       homeController.getFavoriteProducts();
+            //     }
+            //   });
+            // });
           },
           borderRadius: BorderRadius.circular(20),
           child: Padding(
@@ -629,7 +683,7 @@ class EnhancedFavoriteCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          "\$${product.sellingPrice.toStringAsFixed(2)}",
+                          "\$${product.sellingPrice.toStringAsFixed(0)}",
                           style: AppTextStyle.textStyle(
                             responsive.sp(35),
                             AppColors.primary,

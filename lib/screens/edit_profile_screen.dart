@@ -1,11 +1,18 @@
 import 'package:demoecommerceproduct/values/colors.dart';
 import 'package:demoecommerceproduct/values/responsive.dart';
+import 'package:demoecommerceproduct/widgets/change_password_form.dart';
+import 'package:demoecommerceproduct/widgets/change_phone_number_form.dart';
 import 'package:demoecommerceproduct/widgets/edit_prodile_form.dart';
 import 'package:demoecommerceproduct/widgets/login_signup_appBar.dart';
 import 'package:flutter/material.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({super.key});
+  bool isChangeNumber;
+
+  EditProfileScreen({
+    super.key,
+    required this.isChangeNumber,
+  });
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -42,7 +49,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 topLeft: Radius.circular(30),
                                 topRight: Radius.circular(30),
                               )),
-                          child: const EditProfileForm()))
+                          child: widget.isChangeNumber
+                              ? EditProfileChangeNumberForm()
+                              : EditProfileChangePasswordForm()))
                 ],
               ),
             ),

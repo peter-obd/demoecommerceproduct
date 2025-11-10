@@ -1,4 +1,5 @@
 import 'package:demoecommerceproduct/controllers/profile_controller.dart';
+import 'package:demoecommerceproduct/screens/edit_profile_options_screen.dart';
 import 'package:demoecommerceproduct/screens/edit_profile_screen.dart';
 import 'package:demoecommerceproduct/screens/help_support_screen.dart';
 import 'package:demoecommerceproduct/screens/oders_screen.dart';
@@ -34,7 +35,7 @@ class MyProfileScreen extends StatelessWidget {
 
   Widget _buildEnhancedHeader(Responsive responsive) {
     return Container(
-      height: responsive.hp(120),
+      height: responsive.hp(125),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -130,7 +131,14 @@ class MyProfileScreen extends StatelessWidget {
               'Update your personal information',
               Icons.edit_rounded,
               responsive,
-              onTap: () => Get.to(const EditProfileScreen()),
+              onTap: () => Get.to(const EditProfileOptionsScreen()),
+            ),
+            _buildEnhancedMenuItem(
+              'Order History',
+              'View your past orders and purchases',
+              Icons.history_rounded,
+              responsive,
+              onTap: () => Get.to(const OdersScreen()),
             ),
 
             _buildEnhancedMenuItem(
@@ -139,14 +147,6 @@ class MyProfileScreen extends StatelessWidget {
               Icons.location_on_rounded,
               responsive,
               onTap: () => Get.to(() => const ManageAddressesScreen()),
-            ),
-
-            _buildEnhancedMenuItem(
-              'Order History',
-              'View your past orders and purchases',
-              Icons.history_rounded,
-              responsive,
-              onTap: () => Get.to(const OdersScreen()),
             ),
 
             // _buildEnhancedMenuItem(
@@ -362,8 +362,8 @@ class MyProfileScreen extends StatelessWidget {
                                 "No selected address",
                             style: AppTextStyle.textStyle(
                               responsive.sp(32),
-                              controller.defaultAddress != null 
-                                  ? AppColors.blackText 
+                              controller.defaultAddress != null
+                                  ? AppColors.blackText
                                   : AppColors.greyText,
                               FontWeight.w600,
                             ),

@@ -29,7 +29,6 @@ class HelpSupportScreen extends StatelessWidget {
 
   Widget _buildEnhancedHeader(Responsive responsive) {
     return Container(
-      height: responsive.hp(130),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -53,9 +52,14 @@ class HelpSupportScreen extends StatelessWidget {
         ],
       ),
       child: SafeArea(
+        bottom: false,
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: responsive.wp(20)),
+          padding: EdgeInsets.symmetric(
+            horizontal: responsive.wp(20),
+            vertical: responsive.hp(20),
+          ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Back Button
               GestureDetector(
@@ -75,26 +79,11 @@ class HelpSupportScreen extends StatelessWidget {
               ),
               SizedBox(width: responsive.wp(15)),
 
-              // Help Icon
-              // Container(
-              //   padding: EdgeInsets.all(responsive.wp(12)),
-              //   decoration: BoxDecoration(
-              //     color: Colors.white.withOpacity(0.2),
-              //     borderRadius: BorderRadius.circular(15),
-              //   ),
-              //   child: Icon(
-              //     Icons.help_rounded,
-              //     color: Colors.white,
-              //     size: responsive.sp(45),
-              //   ),
-              // ),
-              SizedBox(width: responsive.wp(15)),
-
               // Title Section
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       'Help & Support',
@@ -104,6 +93,7 @@ class HelpSupportScreen extends StatelessWidget {
                         FontWeight.w800,
                       ),
                     ),
+                    SizedBox(height: responsive.hp(5)),
                     Text(
                       'We\'re here to help you',
                       style: AppTextStyle.textStyle(
@@ -434,40 +424,51 @@ class HelpSupportScreen extends StatelessWidget {
   }
 
   void _openWhatsApp() async {
-    const phoneNumber =
-        '+96170052437'; // Replace with your actual WhatsApp number
+    const phoneNumber = '96170052437'; // Phone number without + or spaces
     const message = 'Hello! I need help with my order from your ecommerce app.';
-    final whatsappUrl =
-        'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}';
 
-    try {
-      final Uri whatsappUri = Uri.parse(whatsappUrl);
-      if (await canLaunchUrl(whatsappUri)) {
-        await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
-        Get.snackbar(
-          'Opening WhatsApp',
-          'Launching WhatsApp chat...',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2),
-          icon: const Icon(Icons.chat, color: Colors.white),
-        );
-      } else {
-        Get.snackbar(
-          'Error',
-          'WhatsApp is not installed on this device or cannot be opened.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-          icon: const Icon(Icons.error, color: Colors.white),
-        );
+    // Try multiple URL schemes for better compatibility
+    final whatsappUrls = [
+      // Direct WhatsApp URL (works on most devices)
+      'whatsapp://send?phone=$phoneNumber&text=${Uri.encodeComponent(message)}',
+      // Web-based fallback
+      'https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}',
+      // Alternative direct link
+      'https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encodeComponent(message)}',
+    ];
+
+    bool success = false;
+
+    for (final url in whatsappUrls) {
+      try {
+        final Uri whatsappUri = Uri.parse(url);
+        if (await canLaunchUrl(whatsappUri)) {
+          await launchUrl(
+            whatsappUri,
+            mode: LaunchMode.externalApplication,
+          );
+          Get.snackbar(
+            'Opening WhatsApp',
+            'Launching WhatsApp chat...',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 2),
+            icon: const Icon(Icons.chat, color: Colors.white),
+          );
+          success = true;
+          break;
+        }
+      } catch (e) {
+        // Try next URL
+        continue;
       }
-    } catch (e) {
+    }
+
+    if (!success) {
       Get.snackbar(
         'Error',
-        'Failed to open WhatsApp. Please check if the app is installed.',
+        'WhatsApp is not installed on this device. Please install WhatsApp to continue.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
