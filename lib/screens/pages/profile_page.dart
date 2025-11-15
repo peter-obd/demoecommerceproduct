@@ -179,6 +179,17 @@ class MyProfileScreen extends StatelessWidget {
               },
             ),
 
+            _buildEnhancedMenuItem(
+              'Delete Account',
+              'Permanently delete your account',
+              Icons.delete_forever_rounded,
+              responsive,
+              isDestructive: true,
+              onTap: () {
+                _showDeleteAccountDialog(Get.context!, responsive, controller);
+              },
+            ),
+
             SizedBox(height: responsive.hp(40)),
           ],
         ),
@@ -529,6 +540,292 @@ class MyProfileScreen extends StatelessWidget {
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: onTap,
       ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context, Responsive responsive,
+      ProfileController controller) {
+    final passwordController = TextEditingController();
+
+    final RxBool obscurePassword = true.obs;
+
+    Get.dialog(
+      Obx(
+        () => Stack(
+          children: [
+            Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              backgroundColor: Colors.transparent,
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: responsive.wp(700),
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(25),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 30,
+                      offset: const Offset(0, 15),
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.all(responsive.wp(30)),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Icon and Title
+                        Container(
+                          padding: EdgeInsets.all(responsive.wp(20)),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.warning_rounded,
+                            color: Colors.red,
+                            size: responsive.sp(80),
+                          ),
+                        ),
+                        SizedBox(height: responsive.hp(20)),
+
+                        Text(
+                          'Delete Account',
+                          style: AppTextStyle.textStyle(
+                            responsive.sp(50),
+                            AppColors.blackText,
+                            FontWeight.w700,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: responsive.hp(10)),
+
+                        Text(
+                          'This action cannot be undone. All your data will be permanently deleted.',
+                          style: AppTextStyle.textStyle(
+                            responsive.sp(32),
+                            AppColors.greyText,
+                            FontWeight.w400,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: responsive.hp(30)),
+
+                        // Password Field
+                        Obx(
+                          () => Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.greyBackground.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: AppColors.primary.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: TextField(
+                              controller: passwordController,
+                              obscureText: obscurePassword.value,
+                              enabled: !controller.isdeleteLoading.value,
+                              decoration: InputDecoration(
+                                labelText: 'Enter your password',
+                                labelStyle: AppTextStyle.textStyle(
+                                  responsive.sp(34),
+                                  AppColors.greyText,
+                                  FontWeight.w400,
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.lock_rounded,
+                                  color: AppColors.primary,
+                                  size: responsive.sp(45),
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    obscurePassword.value
+                                        ? Icons.visibility_off_rounded
+                                        : Icons.visibility_rounded,
+                                    color: AppColors.greyText,
+                                    size: responsive.sp(45),
+                                  ),
+                                  onPressed: () {
+                                    obscurePassword.value =
+                                        !obscurePassword.value;
+                                  },
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: responsive.wp(20),
+                                  vertical: responsive.hp(18),
+                                ),
+                              ),
+                              style: AppTextStyle.textStyle(
+                                responsive.sp(36),
+                                AppColors.blackText,
+                                FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: responsive.hp(30)),
+
+                        // Buttons
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: controller.isdeleteLoading.value
+                                    ? null
+                                    : () {
+                                        Get.back();
+                                      },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: responsive.hp(16),
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.greyBackground,
+                                    borderRadius: BorderRadius.circular(15),
+                                    border: Border.all(
+                                      color:
+                                          AppColors.greyText.withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Cancel',
+                                    style: AppTextStyle.textStyle(
+                                      responsive.sp(38),
+                                      AppColors.blackText,
+                                      FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: responsive.wp(15)),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: controller.isdeleteLoading.value
+                                    ? null
+                                    : () {
+                                        if (passwordController.text
+                                            .trim()
+                                            .isEmpty) {
+                                          Get.snackbar(
+                                            'Error',
+                                            'Please enter your password',
+                                            backgroundColor:
+                                                Colors.red.withOpacity(0.8),
+                                            colorText: Colors.white,
+                                            snackPosition: SnackPosition.TOP,
+                                            margin: EdgeInsets.all(
+                                                responsive.wp(20)),
+                                            borderRadius: 15,
+                                          );
+                                          return;
+                                        }
+
+                                        controller.isdeleteLoading.value = true;
+                                        controller.deleteUser(
+                                            passwordController.text.trim());
+                                        // Note: The dialog will close when user is logged out
+                                      },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: responsive.hp(16),
+                                  ),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.red,
+                                        Colors.red.shade700,
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(15),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.red.withOpacity(0.3),
+                                        blurRadius: 15,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    'Delete',
+                                    style: AppTextStyle.textStyle(
+                                      responsive.sp(38),
+                                      Colors.white,
+                                      FontWeight.w700,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Loading Overlay
+            if (controller.isdeleteLoading.value)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Center(
+                    child: Container(
+                      padding: EdgeInsets.all(responsive.wp(30)),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
+                            strokeWidth: 3,
+                          ),
+                          SizedBox(height: responsive.hp(15)),
+                          Text(
+                            'Deleting account...',
+                            style: AppTextStyle.textStyle(
+                              responsive.sp(36),
+                              AppColors.blackText,
+                              FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+      barrierDismissible: false,
     );
   }
 }

@@ -19,9 +19,11 @@ class _EditProfileFormState extends State<EditProfileChangePasswordForm> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   bool _obscurePassword = true;
   bool _confirmObscurePassword = true;
+  bool _currentObscurePassword = true;
 
   final EditProfileController controller = Get.put(EditProfileController());
 
@@ -40,7 +42,7 @@ class _EditProfileFormState extends State<EditProfileChangePasswordForm> {
             // Enhanced Header Section
             _buildEditProfileHeader(responsive),
             SizedBox(height: responsive.hp(20)),
-
+            _buildCurrentPasswordField(responsive),
             // Enhanced Password Field
             _buildPasswordField(responsive),
 
@@ -168,6 +170,97 @@ class _EditProfileFormState extends State<EditProfileChangePasswordForm> {
     );
   }
 
+  Widget _buildCurrentPasswordField(Responsive responsive) {
+    return Container(
+      margin: EdgeInsets.only(bottom: responsive.hp(20)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: 2,
+          ),
+        ],
+        border: Border.all(
+          color: AppColors.greyShadow.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(responsive.wp(15)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(responsive.wp(5)),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.lock_rounded,
+                    color: AppColors.primary,
+                    size: responsive.sp(30),
+                  ),
+                ),
+                SizedBox(width: responsive.wp(15)),
+                Text(
+                  'Current Password',
+                  style: AppTextStyle.textStyle(
+                    responsive.sp(35),
+                    AppColors.blackText,
+                    FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: responsive.hp(10)),
+            TextField(
+              controller: _currentPasswordController,
+              obscureText: _currentObscurePassword,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Enter current password',
+                hintStyle: AppTextStyle.textStyle(
+                  responsive.sp(35),
+                  AppColors.greyShadow,
+                  FontWeight.w400,
+                ),
+                suffixIcon: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _currentObscurePassword = !_currentObscurePassword;
+                    });
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(responsive.wp(8)),
+                    child: Icon(
+                      _currentObscurePassword
+                          ? Icons.visibility_off_rounded
+                          : Icons.visibility_rounded,
+                      color: AppColors.primary,
+                      size: responsive.sp(45),
+                    ),
+                  ),
+                ),
+              ),
+              style: AppTextStyle.textStyle(
+                responsive.sp(40),
+                AppColors.blackText,
+                FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildConfirmPasswordField(Responsive responsive) {
     return Container(
       margin: EdgeInsets.only(bottom: responsive.hp(10)),
@@ -261,69 +354,91 @@ class _EditProfileFormState extends State<EditProfileChangePasswordForm> {
 
   Widget _buildSaveButton(Responsive responsive) {
     return Container(
-      margin: EdgeInsets.only(top: responsive.hp(12)),
-      width: double.infinity,
-      height: responsive.hp(60),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primary,
-            AppColors.primary.withOpacity(0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.4),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-            spreadRadius: 2,
+        margin: EdgeInsets.only(top: responsive.hp(12)),
+        width: double.infinity,
+        height: responsive.hp(60),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primary,
+              AppColors.primary.withOpacity(0.8),
+            ],
           ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: () {
-          if (!controller.isValidPassword(_passwordController.text)) {
-            Utils.showFlushbarError(context,
-                "Password must be atleast 6 charachters and must have at least one number and one capital letter");
-          } else if (_confirmPasswordController.text !=
-              _passwordController.text) {
-            Utils.showFlushbarError(
-                context, "Password and Confirm Password must be same");
-          } else {
-            print("Profile Updated");
-            // Add success message or navigate back
-            Utils.showFlushbarError(context, "Profile updated successfully!");
-          }
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.save_rounded,
-              color: Colors.white,
-              size: responsive.sp(50),
-            ),
-            SizedBox(width: responsive.wp(15)),
-            Text(
-              'Save Changes',
-              style: AppTextStyle.textStyle(
-                responsive.sp(42),
-                Colors.white,
-                FontWeight.w700,
-              ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+              spreadRadius: 2,
             ),
           ],
         ),
-      ),
-    );
+        child: ElevatedButton(
+          onPressed: () {
+            if (!controller.isValidPassword(_passwordController.text)) {
+              Utils.showFlushbarError(context,
+                  "Password must be atleast 6 charachters and must have at least one number and one capital letter");
+            } else if (_confirmPasswordController.text !=
+                _passwordController.text) {
+              Utils.showFlushbarError(
+                  context, "Password and Confirm Password must be same");
+            } else {
+              print("Profile Updated");
+              // Add success message or navigate back
+              controller.requestPasswordChange(
+                  _passwordController.text, _currentPasswordController.text);
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          child: Obx(
+            () => controller.isRequestingPasswordChange.value
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        color: Colors.white,
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        "Loading...",
+                        style: AppTextStyle.textStyle(
+                          responsive.sp(42),
+                          Colors.white,
+                          FontWeight.w700,
+                        ),
+                      )
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.save_rounded,
+                        color: Colors.white,
+                        size: responsive.sp(50),
+                      ),
+                      SizedBox(width: responsive.wp(15)),
+                      Text(
+                        'Save Changes',
+                        style: AppTextStyle.textStyle(
+                          responsive.sp(42),
+                          Colors.white,
+                          FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ));
   }
 
   Widget _buildBackSection(Responsive responsive) {

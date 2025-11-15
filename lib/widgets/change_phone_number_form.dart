@@ -17,7 +17,9 @@ class EditProfileChangeNumberForm extends StatefulWidget {
 
 class _EditProfileFormState extends State<EditProfileChangeNumberForm> {
   final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
+  bool _obscurePassword = true;
   final EditProfileController controller = Get.put(EditProfileController());
 
   @override
@@ -38,6 +40,7 @@ class _EditProfileFormState extends State<EditProfileChangeNumberForm> {
 
             // Enhanced Phone Number Field
             _buildPhoneNumberField(responsive),
+            _buildPasswordField(responsive),
 
             // Enhanced Save Button
             _buildSaveButton(responsive),
@@ -56,7 +59,7 @@ class _EditProfileFormState extends State<EditProfileChangeNumberForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Update your profile information',
+          'Update your profile information, please enter new phone number and your current password',
           style: AppTextStyle.textStyle(
             responsive.sp(35),
             AppColors.greyText,
@@ -107,7 +110,7 @@ class _EditProfileFormState extends State<EditProfileChangeNumberForm> {
                 ),
                 SizedBox(width: responsive.wp(15)),
                 Text(
-                  'Phone Number',
+                  'New Phone Number',
                   style: AppTextStyle.textStyle(
                     responsive.sp(35),
                     AppColors.blackText,
@@ -176,66 +179,102 @@ class _EditProfileFormState extends State<EditProfileChangeNumberForm> {
   }
 
   Widget _buildSaveButton(Responsive responsive) {
-    return Container(
-      margin: EdgeInsets.only(top: responsive.hp(12)),
-      width: double.infinity,
-      height: responsive.hp(60),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primary,
-            AppColors.primary.withOpacity(0.8),
+    return Obx(
+      () => Container(
+        margin: EdgeInsets.only(top: responsive.hp(12)),
+        width: double.infinity,
+        height: responsive.hp(60),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: controller.isRequestingPhoneChange.value
+                ? [
+                    AppColors.greyShadow,
+                    AppColors.greyShadow.withOpacity(0.8),
+                  ]
+                : [
+                    AppColors.primary,
+                    AppColors.primary.withOpacity(0.8),
+                  ],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: controller.isRequestingPhoneChange.value
+                  ? AppColors.greyShadow.withOpacity(0.3)
+                  : AppColors.primary.withOpacity(0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+              spreadRadius: 2,
+            ),
           ],
         ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.4),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: () {
-          String fullPhoneNumber = '+961${_phoneController.text}';
-          print('Phone: $fullPhoneNumber');
+        child: ElevatedButton(
+          onPressed: controller.isRequestingPhoneChange.value
+              ? null
+              : () {
+                  String fullPhoneNumber = '+961${_phoneController.text}';
+                  print('Phone: $fullPhoneNumber');
 
-          if (_phoneController.text.isEmpty) {
-            Utils.showFlushbarError(
-                context, "Make sure to enter your phone number");
-          } else {
-            print("Profile Updated");
-            // Add success message or navigate back
-            Utils.showFlushbarError(context, "Profile updated successfully!");
-          }
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+                  if (_phoneController.text.isEmpty) {
+                    Utils.showFlushbarError(
+                        context, "Make sure to enter your phone number");
+                  } else if (_passwordController.text.isEmpty) {
+                    Utils.showFlushbarError(
+                        context, "Make sure to enter your password");
+                  } else {
+                    controller.requestPhoneChange(
+                        _phoneController.text, _passwordController.text);
+                  }
+                },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
           ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.save_rounded,
-              color: Colors.white,
-              size: responsive.sp(50),
-            ),
-            SizedBox(width: responsive.wp(15)),
-            Text(
-              'Save Changes',
-              style: AppTextStyle.textStyle(
-                responsive.sp(42),
-                Colors.white,
-                FontWeight.w700,
-              ),
-            ),
-          ],
+          child: controller.isRequestingPhoneChange.value
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                    SizedBox(width: responsive.wp(15)),
+                    Text(
+                      'Saving...',
+                      style: AppTextStyle.textStyle(
+                        responsive.sp(42),
+                        Colors.white,
+                        FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.save_rounded,
+                      color: Colors.white,
+                      size: responsive.sp(50),
+                    ),
+                    SizedBox(width: responsive.wp(15)),
+                    Text(
+                      'Save Changes',
+                      style: AppTextStyle.textStyle(
+                        responsive.sp(42),
+                        Colors.white,
+                        FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );
@@ -318,10 +357,101 @@ class _EditProfileFormState extends State<EditProfileChangeNumberForm> {
     );
   }
 
+  Widget _buildPasswordField(Responsive responsive) {
+    return Container(
+      margin: EdgeInsets.only(bottom: responsive.hp(20)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+            spreadRadius: 2,
+          ),
+        ],
+        border: Border.all(
+          color: AppColors.greyShadow.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(responsive.wp(15)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(responsive.wp(5)),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.lock_rounded,
+                    color: AppColors.primary,
+                    size: responsive.sp(30),
+                  ),
+                ),
+                SizedBox(width: responsive.wp(15)),
+                Text(
+                  'Your Account Password',
+                  style: AppTextStyle.textStyle(
+                    responsive.sp(35),
+                    AppColors.blackText,
+                    FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: responsive.hp(10)),
+            TextField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Enter new password',
+                hintStyle: AppTextStyle.textStyle(
+                  responsive.sp(35),
+                  AppColors.greyShadow,
+                  FontWeight.w400,
+                ),
+                suffixIcon: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(responsive.wp(8)),
+                    child: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off_rounded
+                          : Icons.visibility_rounded,
+                      color: AppColors.primary,
+                      size: responsive.sp(45),
+                    ),
+                  ),
+                ),
+              ),
+              style: AppTextStyle.textStyle(
+                responsive.sp(40),
+                AppColors.blackText,
+                FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _phoneController.dispose();
-
+    _passwordController.dispose();
     super.dispose();
   }
 }

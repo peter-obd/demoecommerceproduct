@@ -1,3 +1,4 @@
+import 'package:demoecommerceproduct/Utilities/Utils.dart';
 import 'package:demoecommerceproduct/models/user.dart';
 import 'package:demoecommerceproduct/models/user_address_model.dart';
 import 'package:demoecommerceproduct/screens/location_address_screen.dart';
@@ -12,13 +13,13 @@ import 'package:get/get.dart';
 class ProfileController extends GetxController {
   final Rx<PickedLocation?> _location = Rx<PickedLocation?>(null);
   final Rx<UserAddress?> _defaultAddress = Rx<UserAddress?>(null);
-  
+  final RxBool isdeleteLoading = false.obs;
   PickedLocation? get location => _location.value;
   set location(PickedLocation? value) => _location.value = value;
-  
+
   UserAddress? get defaultAddress => _defaultAddress.value;
   set defaultAddress(UserAddress? value) => _defaultAddress.value = value;
-  
+
   User? user;
 
   @override
@@ -68,6 +69,18 @@ class ProfileController extends GetxController {
   void logoutUser() async {
     await IsarService.instance.clearUser();
     Get.offAll(const LoginScreen());
+  }
+
+  void deleteUser(String password) {
+    isdeleteLoading.value = true;
+    ApisService.deleteAccount(password, (success) async {
+      isdeleteLoading.value = false;
+      await IsarService.instance.clearUser();
+      Get.offAll(const LoginScreen());
+    }, (fail) {
+      isdeleteLoading.value = false;
+      Utils.showFlushbarError(Get.context!, fail.message);
+    });
   }
 
   Future<void> pickLocation(BuildContext context) async {

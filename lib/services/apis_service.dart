@@ -58,6 +58,109 @@ class ApisService {
       "firstName": firstName,
       "lastName": lastName
     };
+    AppRequestManager.postWithToken(url, params, null, true, false, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        String successData = result['data'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void requestPhoneChange(String newPhoneumber, String password,
+      RequestSuccess success, RequestFail fail) {
+    var urlMethod = "Auth/request-phone-change";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {
+      "newPhoneNumber": newPhoneumber,
+      "password": password,
+    };
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        String successData = result['data'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void requestPasswordChange(String newPassword, String currentPassword,
+      RequestSuccess success, RequestFail fail) async {
+    var urlMethod = "Auth/request-change-password";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {
+      "currentPassword": currentPassword,
+      "newPassword": newPassword
+    };
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        String successData = result['data'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void resendOtpPhoneChange(RequestSuccess success, RequestFail fail) {
+    var urlMethod = "Auth/resend-phone-change-otp";
+    var url = _baseUrl + _urlPath + urlMethod;
+
+    AppRequestManager.postWithToken(url, null, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        String successData = result['data'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void verifyPhoneChange(
+      String otp, RequestSuccess success, RequestFail fail) {
+    var urlMethod = "Auth/verify-phone-change";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {"otpCode": otp};
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        String successData = result['data'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void verifyPasswordChange(
+      String otp, RequestSuccess success, RequestFail fail) {
+    var urlMethod = "Auth/verify-change-password";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {"otpCode": otp};
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        String successData = result['data'];
+        success(successData);
+      } catch (e) {
+        debugPrint("Could not parse : ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void deleteAccount(
+      String password, RequestSuccess success, RequestFail fail) {
+    var urlMethod = "Auth/deactivate-account";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = {
+      "password": password,
+    };
     AppRequestManager.postWithToken(url, params, null, true, true, (response) {
       try {
         Map<String, dynamic> result = json.decode(response);
@@ -77,7 +180,7 @@ class ApisService {
       "phone": phone,
       "otpCode": otpCode,
     };
-    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+    AppRequestManager.postWithToken(url, params, null, true, false, (response) {
       try {
         Map<String, dynamic> result = json.decode(response);
         String successData = result['data'];
@@ -94,7 +197,7 @@ class ApisService {
     var url = _baseUrl + _urlPath + urlMethod;
     var params = {"phoneNumber": phone}; // pob rja3la t2akad
 
-    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+    AppRequestManager.postWithToken(url, params, null, true, false, (response) {
       try {
         Map<String, dynamic> result = json.decode(response);
         String successData = result['data'];
@@ -111,7 +214,7 @@ class ApisService {
     var url = _baseUrl + _urlPath + urlMethod;
     var params = {"phoneNumber": phone}; // pob rja3la t2akad
 
-    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+    AppRequestManager.postWithToken(url, params, null, true, false, (response) {
       try {
         Map<String, dynamic> result = json.decode(response);
         String successData = result['data'];
@@ -128,7 +231,7 @@ class ApisService {
     var url = _baseUrl + _urlPath + urlMethod;
     var params = {"phone": phone};
 
-    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+    AppRequestManager.postWithToken(url, params, null, true, false, (response) {
       try {
         Map<String, dynamic> result = json.decode(response);
         String successData = result['data'];
@@ -145,7 +248,7 @@ class ApisService {
     var url = _baseUrl + _urlPath + urlMethod;
     var params = {"phone": phone, "otpCode": otp, "newPassword": password};
 
-    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+    AppRequestManager.postWithToken(url, params, null, true, false, (response) {
       try {
         Map<String, dynamic> result = json.decode(response);
         String successData = result['data'];
