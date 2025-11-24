@@ -88,7 +88,7 @@ class _ForYouSectionWidgetState extends State<ForYouSectionWidget> {
                 left: responsive.wp(20),
                 right: responsive.wp(20),
                 top: responsive.hp(20),
-                bottom: responsive.hp(20) + MediaQuery.of(context).padding.bottom,
+                //+ MediaQuery.of(context).padding.bottom,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

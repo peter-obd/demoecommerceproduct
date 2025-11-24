@@ -87,8 +87,12 @@ class CategoriesItemsWidget extends StatelessWidget {
                       category.id == controller.selectedCategoryId.value;
 
                   return GestureDetector(
-                    onTap: () =>
-                        controller.getProductsByCategory(category.id, "3", "1"),
+                    onTap: () {
+                      if (controller.isLoading.value == false &&
+                          controller.isScrollLoading.value == false) {
+                        controller.getProductsByCategory(category.id, "3", "1");
+                      }
+                    },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeInOut,

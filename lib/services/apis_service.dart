@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:demoecommerceproduct/models/category_model.dart';
+import 'package:demoecommerceproduct/models/district_model.dart';
 import 'package:demoecommerceproduct/models/on_checkout_order_product_model.dart';
 import 'package:demoecommerceproduct/models/order_model.dart';
 import 'package:demoecommerceproduct/models/product/product_data_model.dart';
 import 'package:demoecommerceproduct/models/product/product_model.dart';
+import 'package:demoecommerceproduct/models/search_model.dart';
 import 'package:demoecommerceproduct/models/user.dart';
 import 'package:demoecommerceproduct/models/user_address_model.dart';
 import 'package:demoecommerceproduct/networking/app_request_manager.dart';
@@ -16,6 +18,7 @@ import 'package:flutter/material.dart';
 typedef CategoriesSuccess = Function(List<Category> serviceDirectoryModel);
 typedef ProductDataSuccess = Function(ProductData productData);
 typedef ProductSuccess = Function(List<ProductItem> productData);
+typedef SearchSuccess = Function(PagedResponse searchSuccess);
 typedef UserSuccess = Function(User user);
 typedef addFavoriteProductSuccess = Function(bool success);
 typedef OrdersHistorySuccess = Function(List<OrderModel> orders);
@@ -23,6 +26,7 @@ typedef UserAddressesSuccess = Function(List<UserAddress> addresses);
 typedef SetDefaultAddressSuccess = Function(UserAddress updatedAddress);
 typedef GetDefaultAddressSuccess = Function(UserAddress? defaultAddress);
 typedef ProductByIdSuccess = Function(ProductItem productData);
+typedef DistrictsSuccess = Function(List<District> districts);
 
 class ApisService {
   static const String _baseUrl = "https://onedollarapp.onrender.com/";
@@ -277,15 +281,17 @@ class ApisService {
     }, (error) => fail(error));
   }
 
-  static void addUserAddress(String title, String description, double long,
-      double lat, bool isDefault, RequestSuccess success, RequestFail fail) {
+  static void addUserAddress(String title, String description, String dsitrict,
+      String city, bool isDefault, RequestSuccess success, RequestFail fail) {
     var urlMethod = "UserAddress/add-user-address";
     var url = _baseUrl + _urlPath + urlMethod;
     var params = {
       "title": title,
       "description": description,
-      "longitude": long,
-      "latitude": lat,
+      "longitude": 0,
+      "latitude": 0,
+      "district": "string",
+      "city": "string",
       "isDefault": isDefault
     };
 
@@ -569,25 +575,48 @@ class ApisService {
     }, (error) => fail(error));
   }
 
-  static void searchProduct(
-      String searchText, ProductSuccess success, RequestFail fail) {
+  static void searchProduct(String searchText, int page, int pageSize,
+      SearchSuccess success, RequestFail fail) {
     var urlMethod = "Product/product-search";
     var url = _baseUrl + _urlPath + urlMethod;
 
-    var params = {"searchText": searchText};
+    var params = {"searchText": searchText, "page": page, "pageSize": pageSize};
 
     AppRequestManager.postWithToken(url, params, null, true, true, (response) {
       try {
         Map<String, dynamic> result = json.decode(response);
 
-        List data = result['data'];
-        List<ProductItem> products = [];
-        for (var product in data) {
-          products.add(ProductItem.fromJson(product, false));
-        }
+        Map<String, dynamic> data = result['data'];
+        PagedResponse products = PagedResponse.fromJson(data);
         success(products);
       } catch (e) {
         debugPrint("Could not parse Searched Product: ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void getAppConfig(DistrictsSuccess success, RequestFail fail) {
+    var urlMethod = "AppConfig/get-by-key/lebanon-districts-cities";
+    var url = _baseUrl + _urlPath + urlMethod;
+
+    AppRequestManager.getWithToken(url, null, null, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+
+        if (result['success'] == true && result['data'] != null) {
+          // The value field is a JSON string that needs to be parsed again
+          String valueString = result['data']['value'];
+          List<dynamic> districtsJson = json.decode(valueString);
+
+          List<District> districts = [];
+          for (var district in districtsJson) {
+            districts.add(District.fromJson(district));
+          }
+
+          success(districts);
+        }
+      } catch (e) {
+        debugPrint("Could not parse districts: ${e.toString()}");
       }
     }, (error) => fail(error));
   }

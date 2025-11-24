@@ -63,6 +63,10 @@ class _OsmLocationPickerPageState extends State<OsmLocationPickerPage> {
   void initState() {
     super.initState();
     _center = widget.initialCenter ?? _center;
+    // Fetch initial address for the center position
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _reverseGeocode(_center);
+    });
   }
 
   @override
@@ -184,54 +188,54 @@ class _OsmLocationPickerPageState extends State<OsmLocationPickerPage> {
   }
 
   Future<void> _saveUserAddress(AddressInputResult result) async {
-    try {
-      ApisService.addUserAddress(
-        result.title,
-        result.description,
-        _center.longitude,
-        _center.latitude,
-        result.isDefault,
-        (success) async {
-          final location = PickedLocation(
-            lat: _center.latitude,
-            lng: _center.longitude,
-            address: _address,
-          );
-          await _saveLocationToPrefs(location);
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Address saved successfully!'),
-                backgroundColor: AppColors.primary,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-            Navigator.of(context).pop(location);
-          }
-        },
-        (error) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Failed to save address: $error'),
-                backgroundColor: Colors.red,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        },
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error saving address: $e'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
+    // try {
+    //   ApisService.addUserAddress(
+    //     result.title,
+    //     result.description,
+    //     _center.longitude,
+    //     _center.latitude,
+    //     result.isDefault,
+    //     (success) async {
+    //       final location = PickedLocation(
+    //         lat: _center.latitude,
+    //         lng: _center.longitude,
+    //         address: _address,
+    //       );
+    //       await _saveLocationToPrefs(location);
+    //       if (mounted) {
+    //         ScaffoldMessenger.of(context).showSnackBar(
+    //           SnackBar(
+    //             content: const Text('Address saved successfully!'),
+    //             backgroundColor: AppColors.primary,
+    //             behavior: SnackBarBehavior.floating,
+    //           ),
+    //         );
+    //         Navigator.of(context).pop(location);
+    //       }
+    //     },
+    //     (error) {
+    //       if (mounted) {
+    //         ScaffoldMessenger.of(context).showSnackBar(
+    //           SnackBar(
+    //             content: Text('Failed to save address: $error'),
+    //             backgroundColor: Colors.red,
+    //             behavior: SnackBarBehavior.floating,
+    //           ),
+    //         );
+    //       }
+    //     },
+    //   );
+    // } catch (e) {
+    //   if (mounted) {
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text('Error saving address: $e'),
+    //         backgroundColor: Colors.red,
+    //         behavior: SnackBarBehavior.floating,
+    //       ),
+    //     );
+    //   }
+    // }
   }
 
   // --------- Optional Nominatim search ----------
@@ -425,15 +429,32 @@ class _OsmLocationPickerPageState extends State<OsmLocationPickerPage> {
             bottom: responsive.hp(20),
             child: Container(
               decoration: BoxDecoration(
-                color: AppColors.secondary,
-                borderRadius: BorderRadius.circular(12),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white,
+                    AppColors.greyBackground.withOpacity(0.3),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 15,
-                    offset: const Offset(0, 5),
+                    color: AppColors.primary.withOpacity(0.15),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                    spreadRadius: 2,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
                 ],
+                border: Border.all(
+                  color: AppColors.primary.withOpacity(0.1),
+                  width: 1,
+                ),
               ),
               child: Padding(
                 padding: EdgeInsets.all(responsive.wp(25)),
@@ -447,15 +468,38 @@ class _OsmLocationPickerPageState extends State<OsmLocationPickerPage> {
                         vertical: responsive.hp(15),
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.greyBackground,
-                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.1),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.location_on,
-                            color: AppColors.primary,
-                            size: responsive.wp(35),
+                          Container(
+                            padding: EdgeInsets.all(responsive.wp(8)),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.primary,
+                                  AppColors.primary.withOpacity(0.8),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.location_on,
+                              color: Colors.white,
+                              size: responsive.wp(30),
+                            ),
                           ),
                           SizedBox(width: responsive.wp(15)),
                           Expanded(
@@ -471,7 +515,7 @@ class _OsmLocationPickerPageState extends State<OsmLocationPickerPage> {
                                   style: AppTextStyle.textStyle(
                                     responsive.sp(28),
                                     AppColors.blackText,
-                                    FontWeight.w500,
+                                    FontWeight.w600,
                                   ),
                                 ),
                                 SizedBox(height: responsive.hp(5)),
@@ -489,33 +533,48 @@ class _OsmLocationPickerPageState extends State<OsmLocationPickerPage> {
                         ],
                       ),
                     ),
-                    SizedBox(height: responsive.hp(15)),
+                    SizedBox(height: responsive.hp(20)),
                     // Buttons row - more compact
                     Row(
                       children: [
                         Expanded(
-                          child: SizedBox(
-                            height: responsive.hp(42),
+                          child: Container(
+                            height: responsive.hp(50),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.lightBlue.withOpacity(0.1),
+                                  AppColors.primary.withOpacity(0.05),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.primary.withOpacity(0.3),
+                                width: 1.5,
+                              ),
+                            ),
                             child: ElevatedButton.icon(
                               onPressed: _goToMyLocation,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.lightBlue,
-                                foregroundColor: AppColors.secondary,
+                                backgroundColor: Colors.transparent,
+                                foregroundColor: AppColors.primary,
+                                shadowColor: Colors.transparent,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                                 elevation: 0,
                               ),
                               icon: Icon(
                                 Icons.my_location,
-                                size: responsive.wp(32),
+                                size: responsive.wp(35),
+                                color: AppColors.primary,
                               ),
                               label: Text(
                                 'My Location',
                                 style: AppTextStyle.textStyle(
-                                  responsive.sp(26),
-                                  AppColors.secondary,
-                                  FontWeight.w600,
+                                  responsive.sp(28),
+                                  AppColors.primary,
+                                  FontWeight.w700,
                                 ),
                               ),
                             ),
@@ -523,8 +582,25 @@ class _OsmLocationPickerPageState extends State<OsmLocationPickerPage> {
                         ),
                         SizedBox(width: responsive.wp(15)),
                         Expanded(
-                          child: SizedBox(
-                            height: responsive.hp(42),
+                          child: Container(
+                            height: responsive.hp(50),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.primary,
+                                  AppColors.primary.withOpacity(0.8),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withOpacity(0.4),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                  spreadRadius: 0,
+                                ),
+                              ],
+                            ),
                             child: ElevatedButton.icon(
                               onPressed: () async {
                                 final result = await _showAddressInputDialog();
@@ -533,23 +609,25 @@ class _OsmLocationPickerPageState extends State<OsmLocationPickerPage> {
                                 }
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
+                                backgroundColor: Colors.transparent,
                                 foregroundColor: AppColors.secondary,
+                                shadowColor: Colors.transparent,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                                 elevation: 0,
                               ),
                               icon: Icon(
                                 Icons.check_circle,
-                                size: responsive.wp(32),
+                                size: responsive.wp(35),
+                                color: AppColors.secondary,
                               ),
                               label: Text(
                                 'Confirm',
                                 style: AppTextStyle.textStyle(
-                                  responsive.sp(26),
+                                  responsive.sp(28),
                                   AppColors.secondary,
-                                  FontWeight.w600,
+                                  FontWeight.w700,
                                 ),
                               ),
                             ),
@@ -566,71 +644,120 @@ class _OsmLocationPickerPageState extends State<OsmLocationPickerPage> {
           // Search overlay
           if (_showSearch)
             Positioned(
-              left: responsive.wp(30),
-              right: responsive.wp(30),
-              top: responsive.hp(30),
+              left: responsive.wp(20),
+              right: responsive.wp(20),
+              top: responsive.hp(20),
               child: _SearchBox(
                 controller: _searchCtrl,
                 onChanged: _onSearchChanged,
                 onClear: () {
-                  setState(() => _searchResults = []);
+                  setState(() {
+                    _searchResults = [];
+                    _showSearch = false;
+                    _searchCtrl.clear();
+                  });
                 },
               ),
             ),
           if (_showSearch && (_searching || _searchResults.isNotEmpty))
             Positioned(
-              left: responsive.wp(30),
-              right: responsive.wp(30),
-              top: responsive.hp(110),
+              left: responsive.wp(20),
+              right: responsive.wp(20),
+              top: responsive.hp(100),
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.secondary,
-                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.white,
+                      AppColors.greyBackground.withOpacity(0.5),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppColors.primary.withOpacity(0.15),
+                    width: 1,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: AppColors.primary.withOpacity(0.15),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
+                      spreadRadius: 2,
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: responsive.hp(300)),
+                  constraints: BoxConstraints(maxHeight: responsive.hp(400)),
                   child: _searching
                       ? Padding(
-                          padding: EdgeInsets.all(responsive.wp(40)),
+                          padding: EdgeInsets.all(responsive.wp(60)),
                           child: Center(
                             child: CircularProgressIndicator(
                               color: AppColors.primary,
+                              strokeWidth: 3,
                             ),
                           ),
                         )
                       : ListView.builder(
                           shrinkWrap: true,
-                          padding: EdgeInsets.all(responsive.wp(20)),
+                          padding: EdgeInsets.all(responsive.wp(15)),
                           itemCount: _searchResults.length,
                           itemBuilder: (ctx, i) {
                             final it = _searchResults[i];
                             return Container(
-                              margin: EdgeInsets.only(bottom: responsive.hp(5)),
+                              margin: EdgeInsets.only(bottom: responsive.hp(8)),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  width: 1,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primary.withOpacity(0.05),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
                               child: ListTile(
                                 contentPadding: EdgeInsets.symmetric(
-                                  horizontal: responsive.wp(30),
-                                  vertical: responsive.hp(10),
+                                  horizontal: responsive.wp(20),
+                                  vertical: responsive.hp(8),
                                 ),
-                                leading: Icon(
-                                  Icons.location_on,
-                                  color: AppColors.primary,
-                                  size: responsive.wp(50),
+                                leading: Container(
+                                  padding: EdgeInsets.all(responsive.wp(8)),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColors.primary.withOpacity(0.1),
+                                        AppColors.lightBlue.withOpacity(0.1),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(
+                                    Icons.location_on,
+                                    color: AppColors.primary,
+                                    size: responsive.wp(40),
+                                  ),
                                 ),
                                 title: Text(
                                   it.displayName,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: AppTextStyle.textStyle(
-                                    responsive.sp(30),
+                                    responsive.sp(28),
                                     AppColors.blackText,
-                                    FontWeight.w500,
+                                    FontWeight.w600,
                                   ),
                                 ),
                                 shape: RoundedRectangleBorder(
@@ -675,13 +802,30 @@ class _SearchBox extends StatelessWidget {
     var responsive = Responsive(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.secondary,
-        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white,
+            AppColors.greyBackground.withOpacity(0.3),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.primary.withOpacity(0.2),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: AppColors.primary.withOpacity(0.15),
             blurRadius: 20,
             offset: const Offset(0, 8),
+            spreadRadius: 2,
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -691,52 +835,72 @@ class _SearchBox extends StatelessWidget {
         style: AppTextStyle.textStyle(
           responsive.sp(32),
           AppColors.blackText,
-          FontWeight.w500,
+          FontWeight.w600,
         ),
         decoration: InputDecoration(
           hintText: 'Search for places, addresses...',
           hintStyle: AppTextStyle.textStyle(
-            responsive.sp(32),
+            responsive.sp(30),
             AppColors.greyText,
             FontWeight.w400,
           ),
           contentPadding: EdgeInsets.symmetric(
-            horizontal: responsive.wp(40),
-            vertical: responsive.hp(30),
+            horizontal: responsive.wp(20),
+            vertical: responsive.hp(18),
           ),
-          prefixIcon: Icon(
-            Icons.search,
-            color: AppColors.primary,
-            size: responsive.wp(50),
-          ),
-          suffixIcon: IconButton(
-            icon: Icon(
-              Icons.close,
-              color: AppColors.greyText,
-              size: responsive.wp(50),
+          prefixIcon: Container(
+            margin: EdgeInsets.all(responsive.wp(10)),
+            padding: EdgeInsets.all(responsive.wp(8)),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primary.withOpacity(0.1),
+                  AppColors.lightBlue.withOpacity(0.1),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
             ),
-            onPressed: () {
-              controller.clear();
-              onClear();
-            },
+            child: Icon(
+              Icons.search,
+              color: AppColors.primary,
+              size: responsive.wp(40),
+            ),
+          ),
+          suffixIcon: Container(
+            margin: EdgeInsets.all(responsive.wp(10)),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: Icon(
+                Icons.close_rounded,
+                color: AppColors.primary,
+                size: responsive.wp(45),
+              ),
+              onPressed: () {
+                controller.clear();
+                onClear();
+              },
+            ),
           ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide(
               color: AppColors.primary,
               width: 2,
             ),
           ),
           filled: true,
-          fillColor: AppColors.secondary,
+          fillColor: Colors.transparent,
         ),
         onChanged: onChanged,
       ),

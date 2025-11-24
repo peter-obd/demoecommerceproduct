@@ -1,5 +1,5 @@
 import 'package:demoecommerceproduct/models/user_address_model.dart';
-import 'package:demoecommerceproduct/screens/location_address_screen.dart';
+import 'package:demoecommerceproduct/screens/manual_address_input_screen.dart';
 import 'package:demoecommerceproduct/services/apis_service.dart';
 import 'package:demoecommerceproduct/values/colors.dart';
 import 'package:demoecommerceproduct/values/constants.dart';
@@ -410,20 +410,22 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
               height: responsive.hp(60),
               margin: EdgeInsets.only(bottom: responsive.hp(15)),
               decoration: BoxDecoration(
-                color: AppColors.greyBackground.withOpacity(0.8),
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primary.withOpacity(0.08),
+                    AppColors.lightBlue.withOpacity(0.08),
+                  ],
+                ),
                 borderRadius: BorderRadius.circular(15),
                 border: Border.all(
-                  color: AppColors.greyText.withOpacity(0.3),
-                  width: 1,
+                  color: AppColors.primary.withOpacity(0.3),
+                  width: 1.5,
                 ),
               ),
               child: ElevatedButton(
                 onPressed: () async {
-                  final result = await Get.to(() => const OsmLocationPickerPage(
-                        enableSearch: true,
-                        userAgentPackageName: 'com.yourcompany.app',
-                      ));
-                  if (result == true) {
+                  final result = await Get.to(() => const ManualAddressInputScreen());
+                  if (result != null) {
                     _loadAddresses();
                   }
                 },
@@ -439,7 +441,7 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
                   children: [
                     Icon(
                       Icons.add_location_alt_rounded,
-                      color: AppColors.greyText,
+                      color: AppColors.primary,
                       size: responsive.sp(40),
                     ),
                     SizedBox(width: responsive.wp(15)),
@@ -447,7 +449,7 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
                       'Add New Address',
                       style: AppTextStyle.textStyle(
                         responsive.sp(38),
-                        AppColors.greyText,
+                        AppColors.primary,
                         FontWeight.w600,
                       ),
                     ),

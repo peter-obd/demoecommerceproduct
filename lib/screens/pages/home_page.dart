@@ -36,10 +36,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels ==
-            _scrollController.position.maxScrollExtent &&
+    // Trigger loading when user reaches 85% of scroll position for faster response
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent * 0.90 &&
         controller.forYouProducts.isNotEmpty) {
-      // User has scrolled to the bottom, load more products
+      // User has scrolled near the bottom, load more products
       controller.loadMoreForYouProducts(context);
     }
   }

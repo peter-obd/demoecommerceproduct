@@ -27,13 +27,16 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _isFocused = false;
   final TextEditingController _searchController = TextEditingController();
   final SearchControllerr searchController = Get.put(SearchControllerr());
+  final ScrollController _scrollController = ScrollController();
   Timer? _debounceTimer;
+
   @override
   void initState() {
     super.initState();
     _focusNode = FocusNode();
     _focusNode.addListener(_onFocusChange);
     _focusNode.requestFocus();
+    _scrollController.addListener(_onScroll);
   }
 
   @override
@@ -41,7 +44,16 @@ class _SearchScreenState extends State<SearchScreen> {
     _debounceTimer?.cancel();
     _focusNode.removeListener(_onFocusChange);
     _focusNode.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.9) {
+      searchController.loadMoreProducts();
+    }
   }
 
   void _onFocusChange() {
@@ -458,33 +470,72 @@ class _SearchScreenState extends State<SearchScreen> {
 
           // Enhanced Products Grid
           Expanded(
-            child: GridView.builder(
-              physics: const BouncingScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: responsive.wp(15),
-                mainAxisSpacing: responsive.hp(15),
-                childAspectRatio: 0.7,
-              ),
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                final product = products[index];
-                return GestureDetector(
-                  onTap: () async {
-                    await IsarService.instance
-                        .getProductWithAllRelations(product.id)
-                        .then((onValue) {
-                      Get.to(ProductDetailsScreen(product: onValue!));
-                    });
+            child: Column(
+              children: [
+                Expanded(
+                  child: GridView.builder(
+                    controller: _scrollController,
+                    physics: const BouncingScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: responsive.wp(15),
+                      mainAxisSpacing: responsive.hp(15),
+                      childAspectRatio: 0.7,
+                    ),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return GestureDetector(
+                        onTap: () async {
+                          await IsarService.instance
+                              .getProductWithAllRelations(product.id)
+                              .then((onValue) {
+                            Get.to(ProductDetailsScreen(product: onValue!));
+                          });
 
-                    // Get.to(ProductDetailsScreen(product: product));
-                  },
-                  child: EnhancedSearchProductCard(
-                    product: product,
-                    responsive: responsive,
+                          // Get.to(ProductDetailsScreen(product: product));
+                        },
+                        child: EnhancedSearchProductCard(
+                          product: product,
+                          responsive: responsive,
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+                Obx(() {
+                  if (searchController.isLoadingMore.value) {
+                    return Container(
+                      margin: EdgeInsets.only(bottom: responsive.hp(40)),
+                      padding:
+                          EdgeInsets.symmetric(vertical: responsive.hp(20)),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          SizedBox(width: responsive.wp(15)),
+                          Text(
+                            'Loading more...',
+                            style: AppTextStyle.textStyle(
+                              responsive.sp(32),
+                              AppColors.greyText,
+                              FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }),
+              ],
             ),
           ),
         ],

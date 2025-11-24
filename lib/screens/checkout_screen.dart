@@ -1,7 +1,7 @@
 import 'package:demoecommerceproduct/controllers/basket_controller.dart';
 import 'package:demoecommerceproduct/models/user_address_model.dart';
 import 'package:demoecommerceproduct/screens/address_selection_screen.dart';
-import 'package:demoecommerceproduct/screens/location_address_screen.dart';
+import 'package:demoecommerceproduct/screens/manual_address_input_screen.dart';
 import 'package:demoecommerceproduct/screens/pages/basket_page.dart';
 import 'package:demoecommerceproduct/services/apis_service.dart';
 import 'package:demoecommerceproduct/values/colors.dart';
@@ -270,11 +270,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   'Add New Address',
                   Icons.add_location_alt_rounded,
                   () async {
-                    final result =
-                        await Get.to(() => const OsmLocationPickerPage(
-                              enableSearch: true,
-                              userAgentPackageName: 'com.yourcompany.app',
-                            ));
+                    final result = await Get.to(() => const ManualAddressInputScreen());
                     if (result != null) {
                       // Address was successfully added, reload and select the newest one
                       _loadAddresses(selectNewest: true);
@@ -474,15 +470,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           vertical: responsive.hp(12),
         ),
         decoration: BoxDecoration(
-          color: isSecondary
-              ? AppColors.greyBackground.withOpacity(0.8)
-              : AppColors.primary.withOpacity(0.1),
+          gradient: LinearGradient(
+            colors: isSecondary
+                ? [
+                    AppColors.primary.withOpacity(0.08),
+                    AppColors.lightBlue.withOpacity(0.08),
+                  ]
+                : [
+                    AppColors.primary.withOpacity(0.15),
+                    AppColors.lightBlue.withOpacity(0.15),
+                  ],
+          ),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSecondary
-                ? AppColors.greyText.withOpacity(0.3)
-                : AppColors.primary.withOpacity(0.3),
-            width: 1,
+            color: AppColors.primary.withOpacity(0.3),
+            width: 1.5,
           ),
         ),
         child: Row(
@@ -490,7 +492,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           children: [
             Icon(
               icon,
-              color: isSecondary ? AppColors.greyText : AppColors.primary,
+              color: AppColors.primary,
               size: responsive.sp(30),
             ),
             SizedBox(width: responsive.wp(8)),
@@ -499,7 +501,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 text,
                 style: AppTextStyle.textStyle(
                   responsive.sp(20),
-                  isSecondary ? AppColors.greyText : AppColors.primary,
+                  AppColors.primary,
                   FontWeight.w600,
                 ),
                 textAlign: TextAlign.center,

@@ -1,6 +1,6 @@
 import 'package:demoecommerceproduct/controllers/profile_controller.dart';
 import 'package:demoecommerceproduct/models/user_address_model.dart';
-import 'package:demoecommerceproduct/screens/location_address_screen.dart';
+import 'package:demoecommerceproduct/screens/manual_address_input_screen.dart';
 import 'package:demoecommerceproduct/services/apis_service.dart';
 import 'package:demoecommerceproduct/services/location_storage_service.dart';
 import 'package:demoecommerceproduct/values/colors.dart';
@@ -79,13 +79,7 @@ class _ManageAddressesScreenState extends State<ManageAddressesScreen> {
   }
 
   Future<void> _addNewAddress() async {
-    final result = await Get.to(
-      () => const OsmLocationPickerPage(
-        userAgentPackageName: 'com.demoecommerceproduct.app',
-        title: 'Add New Address',
-        searchCountryCodes: 'lb,ae,sa',
-      ),
-    );
+    final result = await Get.to(() => const ManualAddressInputScreen());
 
     if (result != null) {
       // Reload addresses list
@@ -370,15 +364,6 @@ class _ManageAddressesScreenState extends State<ManageAddressesScreen> {
                   ],
                 ),
               ],
-            ),
-            SizedBox(height: responsive.hp(10)),
-            Text(
-              'Coordinates: ${address.latitude.toStringAsFixed(4)}, ${address.longitude.toStringAsFixed(4)}',
-              style: AppTextStyle.textStyle(
-                responsive.sp(26),
-                AppColors.greyText,
-                FontWeight.w400,
-              ),
             ),
           ],
         ),

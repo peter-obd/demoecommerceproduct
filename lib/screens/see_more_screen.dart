@@ -220,11 +220,10 @@ class _SeeMoreScreenState extends State<SeeMoreScreen> {
 
                     return GestureDetector(
                       onTap: () {
-                        if (controller.isScrollLoading.value == false) {
+                        if (controller.isLoading.value == false &&
+                            controller.isScrollLoading.value == false) {
                           controller.getProductsByCategory(
                               category.id, "6", "1");
-                        } else {
-                          return;
                         }
                       },
                       child: AnimatedContainer(
@@ -332,7 +331,8 @@ class _SeeMoreScreenState extends State<SeeMoreScreen> {
                   left: responsive.wp(20),
                   right: responsive.wp(20),
                   top: responsive.hp(20),
-                  bottom: responsive.hp(20) + MediaQuery.of(context).padding.bottom,
+                  bottom:
+                      responsive.hp(20) + MediaQuery.of(context).padding.bottom,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,

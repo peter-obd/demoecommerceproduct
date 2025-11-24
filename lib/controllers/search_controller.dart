@@ -13,6 +13,10 @@ class SearchControllerr extends GetxController {
   final RxList<ProductItem> filteredProducts = <ProductItem>[].obs;
   final RxBool isLoading = false.obs;
   final RxBool noItemFound = false.obs;
+  final RxBool isLoadingMore = false.obs;
+  final RxBool hasNextPage = false.obs;
+  final RxInt currentPage = 1.obs;
+  final int pageSize = 7;
   @override
   void onInit() {
     super.onInit();
@@ -27,16 +31,23 @@ class SearchControllerr extends GetxController {
   // }
 
   void searchProducts(String searchText) {
-    isLoading.value = true;
-    ApisService.searchProduct(searchText, (success) async {
-      isLoading.value = false;
-      filteredProducts.value = [];
+    // Reset pagination state for new search
+    currentPage.value = 1;
+    filteredProducts.value = [];
+    noItemFound.value = false;
+    hasNextPage.value = false;
 
-      if (success.isEmpty) {
+    isLoading.value = true;
+    ApisService.searchProduct(searchText, currentPage.value, pageSize,
+        (success) async {
+      isLoading.value = false;
+
+      if (success.items.isEmpty) {
         noItemFound.value = true;
       } else {
-        await IsarService.instance.saveMultipleProductsUpsert(success);
-        filteredProducts.value = success;
+        await IsarService.instance.saveMultipleProductsUpsert(success.items);
+        filteredProducts.value = success.items;
+        hasNextPage.value = success.hasNextPage;
       }
     }, (fail) {
       filteredProducts.value = [];
@@ -91,6 +102,32 @@ class SearchControllerr extends GetxController {
 
     // Initially show all products
     // filteredProducts.value = homeController.allProducts;
+  }
+
+  void loadMoreProducts() {
+    if (isLoadingMore.value || !hasNextPage.value) {
+      return;
+    }
+
+    isLoadingMore.value = true;
+    currentPage.value++;
+
+    ApisService.searchProduct(searchQuery.value, currentPage.value, pageSize,
+        (success) async {
+      isLoadingMore.value = false;
+
+      if (success.items.isNotEmpty) {
+        await IsarService.instance.saveMultipleProductsUpsert(success.items);
+        filteredProducts.addAll(success.items);
+        hasNextPage.value = success.hasNextPage;
+      } else {
+        hasNextPage.value = false;
+      }
+    }, (fail) {
+      isLoadingMore.value = false;
+      // Keep the current page on failure
+      currentPage.value--;
+    });
   }
 
   void updateSearchQuery(String query) {
