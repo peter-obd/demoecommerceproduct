@@ -39,12 +39,13 @@ class _SeeMoreScreenState extends State<SeeMoreScreen> {
       if (controller.callFunction.value &&
           controller.isScrollLoading.value == false) {
         controller.pageNumber.value += 1;
-
-        controller.loadMoreProducts(
-            context,
-            controller.selectedCategoryId.value,
-            "6",
-            controller.pageNumber.value.toString());
+        if (controller.hasNextPage.value) {
+          controller.loadMoreProducts(
+              context,
+              controller.selectedCategoryId.value,
+              "6",
+              controller.pageNumber.value.toString());
+        }
       }
     }
   }
@@ -289,73 +290,139 @@ class _SeeMoreScreenState extends State<SeeMoreScreen> {
       }
 
       return Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: responsive.wp(20),
-          // vertical: responsive.hp(10),
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: GridView.builder(
-                controller: _scrollController,
-                physics: const BouncingScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: responsive.wp(15),
-                  mainAxisSpacing: responsive.hp(15),
-                  childAspectRatio: 0.7,
-                ),
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  final product = products[index];
-                  return GestureDetector(
-                    onTap: () async {
-                      await IsarService.instance
-                          .getProductWithAllRelations(product.id)
-                          .then((onValue) {
-                        Get.to(ProductDetailsScreen(product: onValue!));
-                      });
-                      // Get.to(ProductDetailsScreen(product: product));
+          padding: EdgeInsets.symmetric(
+            horizontal: responsive.wp(20),
+            // vertical: responsive.hp(10),
+          ),
+          child: Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.zero,
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: responsive.wp(15),
+                      mainAxisSpacing: responsive.hp(15),
+                      childAspectRatio: 0.7,
+                    ),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return GestureDetector(
+                        onTap: () async {
+                          final onValue = await IsarService.instance
+                              .getProductWithAllRelations(product.id);
+                          Get.to(ProductDetailsScreen(product: onValue!));
+                        },
+                        child: EnhancedProductCard(
+                          product: product,
+                          responsive: responsive,
+                        ),
+                      );
                     },
-                    child: EnhancedProductCard(
-                      product: product,
-                      responsive: responsive,
-                    ),
-                  );
-                },
-              ),
-            ),
-            if (controller.isScrollLoading.value)
-              Container(
-                padding: EdgeInsets.only(
-                  left: responsive.wp(20),
-                  right: responsive.wp(20),
-                  top: responsive.hp(20),
-                  bottom:
-                      responsive.hp(20) + MediaQuery.of(context).padding.bottom,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(
-                      color: AppColors.primary,
-                      strokeWidth: 2,
-                    ),
-                    SizedBox(width: responsive.wp(15)),
-                    Text(
-                      'Loading more products...',
-                      style: AppTextStyle.textStyle(
-                        responsive.sp(32),
-                        AppColors.greyText,
-                        FontWeight.w500,
+                  ),
+
+                  /// ---- Loading more at the BOTTOM ----
+                  if (controller.isScrollLoading.value)
+                    Container(
+                      padding: EdgeInsets.only(
+                        left: responsive.wp(20),
+                        right: responsive.wp(20),
+                        top: responsive.hp(20),
+                        bottom: responsive.hp(20) +
+                            MediaQuery.of(context).padding.bottom,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const CircularProgressIndicator(
+                            color: AppColors.primary,
+                            strokeWidth: 2,
+                          ),
+                          SizedBox(width: responsive.wp(15)),
+                          Text(
+                            'Loading more products...',
+                            style: AppTextStyle.textStyle(
+                              responsive.sp(32),
+                              AppColors.greyText,
+                              FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              )
-          ],
-        ),
-      );
+                ],
+              ),
+            ),
+          )
+          // Column(
+          //   children: [
+          //     Expanded(
+          //       child: GridView.builder(
+          //         controller: _scrollController,
+          //         physics: const BouncingScrollPhysics(),
+          //         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          //           crossAxisCount: 2,
+          //           crossAxisSpacing: responsive.wp(15),
+          //           mainAxisSpacing: responsive.hp(15),
+          //           childAspectRatio: 0.7,
+          //         ),
+          //         itemCount: products.length,
+          //         itemBuilder: (context, index) {
+          //           final product = products[index];
+          //           return GestureDetector(
+          //             onTap: () async {
+          //               await IsarService.instance
+          //                   .getProductWithAllRelations(product.id)
+          //                   .then((onValue) {
+          //                 Get.to(ProductDetailsScreen(product: onValue!));
+          //               });
+          //               // Get.to(ProductDetailsScreen(product: product));
+          //             },
+          //             child: EnhancedProductCard(
+          //               product: product,
+          //               responsive: responsive,
+          //             ),
+          //           );
+          //         },
+          //       ),
+          //     ),
+          //     if (controller.isScrollLoading.value)
+          //       Container(
+          //         padding: EdgeInsets.only(
+          //           left: responsive.wp(20),
+          //           right: responsive.wp(20),
+          //           top: responsive.hp(20),
+          //           bottom:
+          //               responsive.hp(20) + MediaQuery.of(context).padding.bottom,
+          //         ),
+          //         child: Row(
+          //           mainAxisAlignment: MainAxisAlignment.center,
+          //           children: [
+          //             const CircularProgressIndicator(
+          //               color: AppColors.primary,
+          //               strokeWidth: 2,
+          //             ),
+          //             SizedBox(width: responsive.wp(15)),
+          //             Text(
+          //               'Loading more products...',
+          //               style: AppTextStyle.textStyle(
+          //                 responsive.sp(32),
+          //                 AppColors.greyText,
+          //                 FontWeight.w500,
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       )
+          //   ],
+          // ),
+          );
     });
   }
 

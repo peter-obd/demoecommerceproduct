@@ -485,10 +485,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       children: [
         Scaffold(
           backgroundColor: AppColors.greyBackground,
-          appBar: _buildEnhancedAppBar(responsive, context),
+          // appBar:
           body: SingleChildScrollView(
             child: Column(
               children: [
+                _buildEnhancedAppBar(responsive, context),
                 // Enhanced Image Carousel Section
                 _buildEnhancedImageCarousel(responsive),
 
@@ -544,76 +545,82 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  PreferredSizeWidget _buildEnhancedAppBar(
-      Responsive responsive, BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      leading: Container(
-        margin: EdgeInsets.only(left: responsive.wp(15)),
-        child: GestureDetector(
-          onTap: () {
-            if (widget.isFromFavorites == true) {
-              Get.back(result: true);
-            } else {
-              Get.back();
-            }
-          },
-          child: Container(
-            padding: EdgeInsets.all(responsive.wp(8)),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+  Widget _buildEnhancedAppBar(Responsive responsive, BuildContext context) {
+    return Container(
+        margin: EdgeInsets.only(
+            left: responsive.wp(10),
+            right: responsive.wp(10),
+            top: responsive.hp(40)),
+        height: responsive.hp(60),
+        width: double.infinity,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GestureDetector(
+              onTap: () {
+                if (widget.isFromFavorites == true) {
+                  Get.back(result: true);
+                } else {
+                  Get.back();
+                }
+              },
+              child: Container(
+                padding: EdgeInsets.all(responsive.wp(8)),
+                width: responsive.wp(50),
+                height: responsive.hp(50),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Icon(
-              Icons.arrow_back_ios_rounded,
-              color: AppColors.blackText,
-              size: responsive.sp(40),
-            ),
-          ),
-        ),
-      ),
-      actions: [
-        Container(
-          margin: EdgeInsets.only(right: responsive.wp(15)),
-          child: GestureDetector(
-            onTap: () => _toggleFavorite(),
-            child: Container(
-              padding: EdgeInsets.all(responsive.wp(8)),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+                child: Center(
+                  child: Icon(
+                    Icons.arrow_back_ios_rounded,
+                    color: AppColors.blackText,
+                    size: responsive.sp(40),
                   ),
-                ],
-              ),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: Icon(
-                  key: ValueKey(_isFavorite),
-                  _isFavorite
-                      ? Icons.favorite_rounded
-                      : Icons.favorite_border_rounded,
-                  color: _isFavorite ? Colors.red : AppColors.blackText,
-                  size: responsive.sp(40),
                 ),
               ),
             ),
-          ),
-        ),
-      ],
-    );
+            GestureDetector(
+              onTap: () => _toggleFavorite(),
+              child: Container(
+                width: responsive.wp(50),
+                height: responsive.hp(50),
+                padding: EdgeInsets.all(responsive.wp(8)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: Icon(
+                    key: ValueKey(_isFavorite),
+                    _isFavorite
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    color: _isFavorite ? Colors.red : AppColors.blackText,
+                    size: responsive.sp(40),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ));
+    // ),
   }
 
   Widget _buildEnhancedImageCarousel(Responsive responsive) {

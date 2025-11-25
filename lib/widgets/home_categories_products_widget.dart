@@ -300,6 +300,7 @@ class CategoriesItemsWidget extends StatelessWidget {
               ),
             ),
             // Product Image with enhanced styling
+
             Container(
               height: responsive.hp(140),
               width: responsive.wp(140),
@@ -321,7 +322,7 @@ class CategoriesItemsWidget extends StatelessWidget {
               ),
               child: ClipOval(
                 child: Container(
-                  padding: EdgeInsets.all(responsive.wp(10)),
+                  padding: EdgeInsets.all(responsive.wp(20)),
                   child: Image.network(
                     product.thumbnail ?? "",
                     fit: BoxFit.contain,

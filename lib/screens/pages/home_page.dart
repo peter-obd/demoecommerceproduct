@@ -41,7 +41,9 @@ class _HomePageState extends State<HomePage> {
             _scrollController.position.maxScrollExtent * 0.90 &&
         controller.forYouProducts.isNotEmpty) {
       // User has scrolled near the bottom, load more products
-      controller.loadMoreForYouProducts(context);
+      if (controller.hasNextPagetoCall.value) {
+        controller.loadMoreForYouProducts(context);
+      }
     }
   }
 
@@ -281,7 +283,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildPromotionalBanner(Responsive responsive) {
     return Container(
-      height: responsive.hp(180),
+      height: responsive.hp(190),
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -332,7 +334,11 @@ class _HomePageState extends State<HomePage> {
           ),
           // Content
           Padding(
-            padding: EdgeInsets.all(responsive.wp(10)),
+            padding: EdgeInsets.only(
+                left: responsive.wp(10),
+                right: responsive.wp(10),
+                top: responsive.hp(10),
+                bottom: responsive.hp(10)),
             child: Row(
               children: [
                 Expanded(

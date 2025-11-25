@@ -17,6 +17,7 @@ class SearchControllerr extends GetxController {
   final RxBool hasNextPage = false.obs;
   final RxInt currentPage = 1.obs;
   final int pageSize = 7;
+  RxInt totalProductFoundCount = 0.obs;
   @override
   void onInit() {
     super.onInit();
@@ -41,7 +42,7 @@ class SearchControllerr extends GetxController {
     ApisService.searchProduct(searchText, currentPage.value, pageSize,
         (success) async {
       isLoading.value = false;
-
+      totalProductFoundCount.value = success.totalCount;
       if (success.items.isEmpty) {
         noItemFound.value = true;
       } else {

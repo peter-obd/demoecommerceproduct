@@ -94,27 +94,28 @@ class _SearchScreenState extends State<SearchScreen> {
           ],
         ),
       ),
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: responsive.wp(20)),
-          child: Row(
-            children: [
-              // Enhanced Back Button
-              GestureDetector(
-                onTap: () => Get.back(result: true),
-                child: Container(
-                  padding: EdgeInsets.all(responsive.wp(12)),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: responsive.wp(20)),
+        child: Row(
+          children: [
+            // Enhanced Back Button
+            GestureDetector(
+              onTap: () => Get.back(result: true),
+              child: Container(
+                width: responsive.wp(50),
+                height: responsive.hp(55),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Center(
                   child: Icon(
                     Icons.arrow_back_ios_rounded,
                     color: AppColors.blackText,
@@ -122,62 +123,69 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                 ),
               ),
-              SizedBox(width: responsive.wp(15)),
-              Expanded(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  height: 55, // fixed for consistency across devices
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _isFocused
-                            ? AppColors.primary.withOpacity(0.2)
-                            : Colors.black.withOpacity(0.1),
-                        blurRadius: _isFocused ? 15 : 8,
-                        offset: const Offset(0, 5),
-                        spreadRadius: _isFocused ? 2 : 0,
-                      ),
-                    ],
-                    border: Border.all(
+            ),
+            SizedBox(width: responsive.wp(15)),
+            Expanded(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                height:
+                    responsive.hp(60), // fixed for consistency across devices
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
                       color: _isFocused
-                          ? AppColors.primary
-                          : AppColors.greyShadow.withOpacity(0.3),
-                      width: _isFocused ? 2 : 1,
+                          ? AppColors.primary.withOpacity(0.2)
+                          : Colors.black.withOpacity(0.1),
+                      blurRadius: _isFocused ? 15 : 8,
+                      offset: const Offset(0, 5),
+                      spreadRadius: _isFocused ? 2 : 0,
                     ),
+                  ],
+                  border: Border.all(
+                    color: _isFocused
+                        ? AppColors.primary
+                        : AppColors.greyShadow.withOpacity(0.3),
+                    width: _isFocused ? 2 : 1,
                   ),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 15),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: _isFocused
-                              ? AppColors.primary
-                              : AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                ),
+                child: Row(
+                  children: [
+                    const SizedBox(width: 15),
+                    Container(
+                      // padding: const EdgeInsets.all(8),
+                      height: responsive.hp(35),
+                      width: responsive.wp(40),
+                      decoration: BoxDecoration(
+                        color: _isFocused
+                            ? AppColors.primary
+                            : AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
                         child: Icon(
                           Icons.search,
                           color: _isFocused ? Colors.white : AppColors.primary,
-                          size: 22,
+                          size: responsive.sp(40),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Center(
                         child: TextField(
                           controller: _searchController,
                           focusNode: _focusNode,
                           style: AppTextStyle.textStyle(
-                            16, // fixed sp for readability
+                            responsive.sp(30), // fixed sp for readability
                             AppColors.blackText,
                             FontWeight.w500,
                           ),
                           decoration: InputDecoration(
                             hintText: "Search products...",
                             hintStyle: AppTextStyle.textStyle(
-                              16,
+                              responsive.sp(30),
                               AppColors.greyText,
                               FontWeight.w400,
                             ),
@@ -195,133 +203,133 @@ class _SearchScreenState extends State<SearchScreen> {
                           },
                         ),
                       ),
-                      if (_searchController.text.isNotEmpty)
-                        GestureDetector(
-                          onTap: () {
-                            _searchController.clear();
-                            searchController.filteredProducts.clear();
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: AppColors.greyText.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              color: AppColors.greyText,
-                              size: 18,
-                            ),
+                    ),
+                    if (_searchController.text.isNotEmpty)
+                      GestureDetector(
+                        onTap: () {
+                          _searchController.clear();
+                          searchController.filteredProducts.clear();
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 12),
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: AppColors.greyText.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.close,
+                            color: AppColors.greyText,
+                            size: 18,
                           ),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
               ),
+            ),
 
-              // Enhanced Search Field
-              // Expanded(
-              //   child: AnimatedContainer(
-              //     duration: const Duration(milliseconds: 300),
-              //     height: responsive.hp(60),
-              //     decoration: BoxDecoration(
-              //       color: Colors.white,
-              //       borderRadius: BorderRadius.circular(30),
-              //       boxShadow: [
-              //         BoxShadow(
-              //           color: _isFocused
-              //               ? AppColors.primary.withOpacity(0.2)
-              //               : Colors.black.withOpacity(0.1),
-              //           blurRadius: _isFocused ? 15 : 8,
-              //           offset: const Offset(0, 5),
-              //           spreadRadius: _isFocused ? 2 : 0,
-              //         ),
-              //       ],
-              //       border: Border.all(
-              //         color: _isFocused
-              //             ? AppColors.primary
-              //             : AppColors.greyShadow.withOpacity(0.3),
-              //         width: _isFocused ? 2 : 1,
-              //       ),
-              //     ),
-              //     child: Row(
-              //       children: [
-              //         SizedBox(width: responsive.wp(20)),
-              //         AnimatedContainer(
-              //           duration: const Duration(milliseconds: 300),
-              //           padding: EdgeInsets.all(responsive.wp(8)),
-              //           decoration: BoxDecoration(
-              //             color: _isFocused
-              //                 ? AppColors.primary
-              //                 : AppColors.primary.withOpacity(0.1),
-              //             borderRadius: BorderRadius.circular(12),
-              //           ),
-              //           child: Icon(
-              //             Icons.search,
-              //             color: _isFocused ? Colors.white : AppColors.primary,
-              //             size: responsive.sp(35),
-              //           ),
-              //         ),
-              //         SizedBox(width: responsive.wp(15)),
-              //         Expanded(
-              //           child: TextField(
-              //             controller: _searchController,
-              //             focusNode: _focusNode,
-              //             onChanged: (value) {
-              //               searchController.isLoading.value = true;
-              //               _debounceTimer?.cancel();
+            // Enhanced Search Field
+            // Expanded(
+            //   child: AnimatedContainer(
+            //     duration: const Duration(milliseconds: 300),
+            //     height: responsive.hp(60),
+            //     decoration: BoxDecoration(
+            //       color: Colors.white,
+            //       borderRadius: BorderRadius.circular(30),
+            //       boxShadow: [
+            //         BoxShadow(
+            //           color: _isFocused
+            //               ? AppColors.primary.withOpacity(0.2)
+            //               : Colors.black.withOpacity(0.1),
+            //           blurRadius: _isFocused ? 15 : 8,
+            //           offset: const Offset(0, 5),
+            //           spreadRadius: _isFocused ? 2 : 0,
+            //         ),
+            //       ],
+            //       border: Border.all(
+            //         color: _isFocused
+            //             ? AppColors.primary
+            //             : AppColors.greyShadow.withOpacity(0.3),
+            //         width: _isFocused ? 2 : 1,
+            //       ),
+            //     ),
+            //     child: Row(
+            //       children: [
+            //         SizedBox(width: responsive.wp(20)),
+            //         AnimatedContainer(
+            //           duration: const Duration(milliseconds: 300),
+            //           padding: EdgeInsets.all(responsive.wp(8)),
+            //           decoration: BoxDecoration(
+            //             color: _isFocused
+            //                 ? AppColors.primary
+            //                 : AppColors.primary.withOpacity(0.1),
+            //             borderRadius: BorderRadius.circular(12),
+            //           ),
+            //           child: Icon(
+            //             Icons.search,
+            //             color: _isFocused ? Colors.white : AppColors.primary,
+            //             size: responsive.sp(35),
+            //           ),
+            //         ),
+            //         SizedBox(width: responsive.wp(15)),
+            //         Expanded(
+            //           child: TextField(
+            //             controller: _searchController,
+            //             focusNode: _focusNode,
+            //             onChanged: (value) {
+            //               searchController.isLoading.value = true;
+            //               _debounceTimer?.cancel();
 
-              //               _debounceTimer =
-              //                   Timer(const Duration(seconds: 1), () {
-              //                 searchController.searchProducts(value);
-              //               });
-              //             },
-              //             style: AppTextStyle.textStyle(
-              //               responsive.sp(32),
-              //               AppColors.blackText,
-              //               FontWeight.w500,
-              //             ),
-              //             decoration: InputDecoration(
-              //               hintText: "Search products...",
-              //               hintStyle: AppTextStyle.textStyle(
-              //                 responsive.sp(32),
-              //                 AppColors.greyText,
-              //                 FontWeight.w400,
-              //               ),
-              //               border: InputBorder.none,
-              //               contentPadding: EdgeInsets.symmetric(
-              //                 vertical: responsive.hp(15),
-              //               ),
-              //             ),
-              //           ),
-              //         ),
-              //         if (_searchController.text.isNotEmpty)
-              //           GestureDetector(
-              //             onTap: () {
-              //               _searchController.clear();
-              //               searchController.filteredProducts.clear();
-              //             },
-              //             child: Container(
-              //               margin: EdgeInsets.only(right: responsive.wp(15)),
-              //               padding: EdgeInsets.all(responsive.wp(8)),
-              //               decoration: BoxDecoration(
-              //                 color: AppColors.greyText.withOpacity(0.2),
-              //                 borderRadius: BorderRadius.circular(12),
-              //               ),
-              //               child: Icon(
-              //                 Icons.close,
-              //                 color: AppColors.greyText,
-              //                 size: responsive.sp(30),
-              //               ),
-              //             ),
-              //           ),
-              //       ],
-              //     ),
-              //   ),
-              // ),
-            ],
-          ),
+            //               _debounceTimer =
+            //                   Timer(const Duration(seconds: 1), () {
+            //                 searchController.searchProducts(value);
+            //               });
+            //             },
+            //             style: AppTextStyle.textStyle(
+            //               responsive.sp(32),
+            //               AppColors.blackText,
+            //               FontWeight.w500,
+            //             ),
+            //             decoration: InputDecoration(
+            //               hintText: "Search products...",
+            //               hintStyle: AppTextStyle.textStyle(
+            //                 responsive.sp(32),
+            //                 AppColors.greyText,
+            //                 FontWeight.w400,
+            //               ),
+            //               border: InputBorder.none,
+            //               contentPadding: EdgeInsets.symmetric(
+            //                 vertical: responsive.hp(15),
+            //               ),
+            //             ),
+            //           ),
+            //         ),
+            //         if (_searchController.text.isNotEmpty)
+            //           GestureDetector(
+            //             onTap: () {
+            //               _searchController.clear();
+            //               searchController.filteredProducts.clear();
+            //             },
+            //             child: Container(
+            //               margin: EdgeInsets.only(right: responsive.wp(15)),
+            //               padding: EdgeInsets.all(responsive.wp(8)),
+            //               decoration: BoxDecoration(
+            //                 color: AppColors.greyText.withOpacity(0.2),
+            //                 borderRadius: BorderRadius.circular(12),
+            //               ),
+            //               child: Icon(
+            //                 Icons.close,
+            //                 color: AppColors.greyText,
+            //                 size: responsive.sp(30),
+            //               ),
+            //             ),
+            //           ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+          ],
         ),
       ),
     );
@@ -445,7 +453,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Found ${products.length} results',
+                        'Found ${searchController.totalProductFoundCount.value} results',
                         style: AppTextStyle.textStyle(
                           responsive.sp(40),
                           AppColors.blackText,
@@ -467,77 +475,154 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
           // SizedBox(height: responsive.hp(10)),
-
-          // Enhanced Products Grid
           Expanded(
-            child: Column(
-              children: [
-                Expanded(
-                  child: GridView.builder(
-                    controller: _scrollController,
-                    physics: const BouncingScrollPhysics(),
+            child: CustomScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(
+                    // horizontal: responsive.wp(15),
+                    vertical: responsive.hp(15),
+                  ),
+                  sliver: SliverGrid(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: responsive.wp(15),
                       mainAxisSpacing: responsive.hp(15),
                       childAspectRatio: 0.7,
                     ),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return GestureDetector(
-                        onTap: () async {
-                          await IsarService.instance
-                              .getProductWithAllRelations(product.id)
-                              .then((onValue) {
-                            Get.to(ProductDetailsScreen(product: onValue!));
-                          });
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final product = products[index];
+                        return GestureDetector(
+                          onTap: () async {
+                            final onValue = await IsarService.instance
+                                .getProductWithAllRelations(product.id);
 
-                          // Get.to(ProductDetailsScreen(product: product));
-                        },
-                        child: EnhancedSearchProductCard(
-                          product: product,
-                          responsive: responsive,
-                        ),
-                      );
-                    },
+                            Get.to(ProductDetailsScreen(product: onValue!));
+                          },
+                          child: EnhancedSearchProductCard(
+                            product: product,
+                            responsive: responsive,
+                          ),
+                        );
+                      },
+                      childCount: products.length,
+                    ),
                   ),
                 ),
+
+                /// --- Loading More Section ---
                 Obx(() {
                   if (searchController.isLoadingMore.value) {
-                    return Container(
-                      margin: EdgeInsets.only(bottom: responsive.hp(40)),
-                      padding:
-                          EdgeInsets.symmetric(vertical: responsive.hp(20)),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.primary,
+                    return SliverToBoxAdapter(
+                      child: Container(
+                        padding: EdgeInsets.only(
+                            bottom: responsive.hp(70), top: responsive.hp(20)),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primary,
+                              ),
                             ),
-                          ),
-                          SizedBox(width: responsive.wp(15)),
-                          Text(
-                            'Loading more...',
-                            style: AppTextStyle.textStyle(
-                              responsive.sp(32),
-                              AppColors.greyText,
-                              FontWeight.w500,
+                            SizedBox(width: responsive.wp(15)),
+                            Text(
+                              'Loading more...',
+                              style: AppTextStyle.textStyle(
+                                responsive.sp(32),
+                                AppColors.greyText,
+                                FontWeight.w500,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   }
-                  return const SizedBox.shrink();
+
+                  return const SliverToBoxAdapter(child: SizedBox());
                 }),
               ],
             ),
-          ),
+          )
+
+          // Enhanced Products Grid
+          // Expanded(
+          //   child: Column(
+          //     children: [
+          //       Expanded(
+          //         child: GridView.builder(
+          //           controller: _scrollController,
+          //           physics: const BouncingScrollPhysics(),
+          //           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          //             crossAxisCount: 2,
+          //             crossAxisSpacing: responsive.wp(15),
+          //             mainAxisSpacing: responsive.hp(15),
+          //             childAspectRatio: 0.7,
+          //           ),
+          //           itemCount: products.length,
+          //           itemBuilder: (context, index) {
+          //             final product = products[index];
+          //             return GestureDetector(
+          //               onTap: () async {
+          //                 await IsarService.instance
+          //                     .getProductWithAllRelations(product.id)
+          //                     .then((onValue) {
+          //                   Get.to(ProductDetailsScreen(product: onValue!));
+          //                 });
+
+          //                 // Get.to(ProductDetailsScreen(product: product));
+          //               },
+          //               child: EnhancedSearchProductCard(
+          //                 product: product,
+          //                 responsive: responsive,
+          //               ),
+          //             );
+          //           },
+          //         ),
+          //       ),
+          //       Obx(() {
+          //         if (searchController.isLoadingMore.value) {
+          //           return Container(
+          //             margin: EdgeInsets.only(bottom: responsive.hp(40)),
+          //             padding:
+          //                 EdgeInsets.symmetric(vertical: responsive.hp(20)),
+          //             child: Row(
+          //               mainAxisAlignment: MainAxisAlignment.center,
+          //               children: [
+          //                 const SizedBox(
+          //                   width: 20,
+          //                   height: 20,
+          //                   child: CircularProgressIndicator(
+          //                     strokeWidth: 2,
+          //                     color: AppColors.primary,
+          //                   ),
+          //                 ),
+          //                 SizedBox(width: responsive.wp(15)),
+          //                 Text(
+          //                   'Loading more...',
+          //                   style: AppTextStyle.textStyle(
+          //                     responsive.sp(32),
+          //                     AppColors.greyText,
+          //                     FontWeight.w500,
+          //                   ),
+          //                 ),
+          //               ],
+          //             ),
+          //           );
+          //         }
+          //         return const SizedBox.shrink();
+          //       }),
+          //     ],
+          //   ),
+          // ),
         ],
       ),
     );

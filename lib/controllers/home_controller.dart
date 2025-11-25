@@ -127,12 +127,14 @@ class HomeController extends GetxController {
 
   RxBool callFunction = true.obs;
   RxBool isScrollLoading = false.obs;
+  RxBool hasNextPage = true.obs;
   void loadMoreProducts(BuildContext context, String categoryId,
       String pageSize, String pageNumebr) {
     isScrollLoading.value = true;
     callFunction.value = false;
     ApisService.getProductByCategoryId(categoryId, pageSize, true, pageNumebr,
         (res) {
+      hasNextPage.value = res.hasNextPage;
       if (res.items.isEmpty) {
         Utils.showFlushbarError(
             context, "No more products for this category!!");
@@ -348,6 +350,7 @@ class HomeController extends GetxController {
   // }
 
   // Load more For You products (pagination)
+  RxBool hasNextPagetoCall = true.obs;
   void loadMoreForYouProducts(BuildContext context) async {
     if (isForYouLoadingMore.value) return;
 
@@ -356,28 +359,29 @@ class HomeController extends GetxController {
     isForYouuLoadingg.value = true;
     // Get current user ID
     final user = await IsarService.instance.getCurrentUser();
-    // if (user != null) {
-    ApisService.getForYouByUserId("2f54085d-00e8-4bc8-adaf-3a54e1d6c2be", "6",
-        forYouPageNumber.value.toString(), (ProductData productData) {
-      // Add new products to existing list
-      if (productData.items.isEmpty) {
-        Utils.showFlushbarError(context, "No More For You Products!!");
-      } else {
-        forYouProducts.addAll(productData.items);
-      }
-      isForYouuLoadingg.value = false;
-      isForYouLoadingMore.value = false;
-    }, (error) {
-      isForYouLoadingMore.value = false;
-      isForYouuLoadingg.value = false;
-      // Decrease page number if API call failed
-      forYouPageNumber.value--;
-      debugPrint("Error loading more For You products: $error");
-    });
-    // } else {
-    //   isForYouuLoadingg.value = false;
-    //   isForYouLoadingMore.value = false;
-    //   forYouPageNumber.value--;
-    // }
+    if (user != null) {
+      ApisService.getForYouByUserId(
+          user.userId, "6", forYouPageNumber.value.toString(), (productData) {
+        hasNextPagetoCall.value = productData.hasNextPage;
+        // Add new products to existing list
+        if (productData.items.isEmpty) {
+          Utils.showFlushbarError(context, "No More For You Products!!");
+        } else {
+          forYouProducts.addAll(productData.items);
+        }
+        isForYouuLoadingg.value = false;
+        isForYouLoadingMore.value = false;
+      }, (error) {
+        isForYouLoadingMore.value = false;
+        isForYouuLoadingg.value = false;
+        // Decrease page number if API call failed
+        forYouPageNumber.value--;
+        debugPrint("Error loading more For You products: $error");
+      });
+      // } else {
+      //   isForYouuLoadingg.value = false;
+      //   isForYouLoadingMore.value = false;
+      //   forYouPageNumber.value--;
+    }
   }
 }
