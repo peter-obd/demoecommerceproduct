@@ -24,6 +24,7 @@ class BasketPage extends StatefulWidget {
 
 class _BasketPageState extends State<BasketPage> {
   final BasketController controller = Get.put(BasketController());
+  bool _isCheckoutExpanded = false; // State for expandable checkout section
   // var total;
   // @override
   // void initState() {
@@ -228,37 +229,135 @@ class _BasketPageState extends State<BasketPage> {
   }
 
   Widget _buildEnhancedCheckoutSection(Responsive responsive) {
-    return Container(
-      margin: EdgeInsets.all(responsive.wp(20)),
-      padding: EdgeInsets.all(responsive.wp(20)),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _isCheckoutExpanded = !_isCheckoutExpanded;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        margin: EdgeInsets.all(responsive.wp(20)),
+        padding: EdgeInsets.all(responsive.wp(20)),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.1),
+              blurRadius: 25,
+              offset: const Offset(0, -10),
+              spreadRadius: 3,
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -3),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            // Collapsed view - Always visible
+            _buildCollapsedCheckoutView(responsive),
+
+            // Expanded content - Shows when expanded
+            AnimatedCrossFade(
+              firstChild: const SizedBox.shrink(),
+              secondChild: Column(
+                children: [
+                  SizedBox(height: responsive.hp(20)),
+                  // Order Summary
+                  _buildOrderSummary(responsive),
+                  SizedBox(height: responsive.hp(20)),
+                  // Checkout Button - Only visible when expanded
+                  _buildEnhancedCheckoutButton(responsive),
+                ],
+              ),
+              crossFadeState: _isCheckoutExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 300),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCollapsedCheckoutView(Responsive responsive) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Total and action text
+        Expanded(
+          child: Row(
+            children: [
+              // Total label and price
+              Text(
+                'Total ',
+                style: AppTextStyle.textStyle(
+                  responsive.sp(35),
+                  AppColors.greyText,
+                  FontWeight.w500,
+                ),
+              ),
+              Obx(
+                () => Text(
+                  '\$${controller.total.value.toStringAsFixed(0)}',
+                  style: AppTextStyle.textStyle(
+                    responsive.sp(42),
+                    AppColors.primary,
+                    FontWeight.w800,
+                  ),
+                ),
+              ),
+              SizedBox(width: responsive.wp(8)),
+              // Separator
+              Container(
+                height: responsive.hp(30),
+                width: 1.5,
+                color: AppColors.greyShadow.withOpacity(0.5),
+              ),
+              SizedBox(width: responsive.wp(8)),
+              // Press to checkout text
+              Expanded(
+                child: Text(
+                  'Press to checkout',
+                  style: AppTextStyle.textStyle(
+                    responsive.sp(32),
+                    AppColors.blackText,
+                    FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Expand/Collapse indicator
+        Container(
+          padding: EdgeInsets.only(
+              left: responsive.wp(7),
+              right: responsive.wp(7),
+              top: responsive.hp(3),
+              bottom: responsive.hp(3)),
+          decoration: BoxDecoration(
             color: AppColors.primary.withOpacity(0.1),
-            blurRadius: 25,
-            offset: const Offset(0, -10),
-            spreadRadius: 3,
+            borderRadius: BorderRadius.circular(15),
           ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -3),
+          child: AnimatedRotation(
+            turns: _isCheckoutExpanded ? 0.5 : 0,
+            duration: const Duration(milliseconds: 300),
+            child: Icon(
+              Icons.keyboard_arrow_up_rounded,
+              color: AppColors.primary,
+              size: responsive.sp(45),
+            ),
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Order Summary
-          _buildOrderSummary(responsive),
-
-          SizedBox(height: responsive.hp(20)),
-
-          // Enhanced Checkout Button
-          _buildEnhancedCheckoutButton(responsive),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -266,54 +365,56 @@ class _BasketPageState extends State<BasketPage> {
     return Column(
       children: [
         // Subtotal Row
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Subtotal',
-              style: AppTextStyle.textStyle(
-                responsive.sp(35),
-                AppColors.greyText,
-                FontWeight.w500,
-              ),
-            ),
-            Text(
-              '\$${controller.total.toStringAsFixed(0)}',
-              style: AppTextStyle.textStyle(
-                responsive.sp(35),
-                AppColors.blackText,
-                FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Text(
+        //       'Subtotal',
+        //       style: AppTextStyle.textStyle(
+        //         responsive.sp(35),
+        //         AppColors.greyText,
+        //         FontWeight.w500,
+        //       ),
+        //     ),
+        //     Obx(
+        //       () => Text(
+        //         '\$${controller.total.value.toStringAsFixed(0)}',
+        //         style: AppTextStyle.textStyle(
+        //           responsive.sp(35),
+        //           AppColors.blackText,
+        //           FontWeight.w600,
+        //         ),
+        //       ),
+        //     )
+        //   ],
+        // ),
 
-        SizedBox(height: responsive.hp(8)),
+        // SizedBox(height: responsive.hp(8)),
 
         // Delivery Fee Row
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Delivery Fee',
-              style: AppTextStyle.textStyle(
-                responsive.sp(35),
-                AppColors.greyText,
-                FontWeight.w500,
-              ),
-            ),
-            Text(
-              'Free',
-              style: AppTextStyle.textStyle(
-                responsive.sp(35),
-                AppColors.primary,
-                FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Text(
+        //       'Delivery Fee',
+        //       style: AppTextStyle.textStyle(
+        //         responsive.sp(35),
+        //         AppColors.greyText,
+        //         FontWeight.w500,
+        //       ),
+        //     ),
+        //     Text(
+        //       'Free',
+        //       style: AppTextStyle.textStyle(
+        //         responsive.sp(35),
+        //         AppColors.primary,
+        //         FontWeight.w600,
+        //       ),
+        //     ),
+        //   ],
+        // ),
 
-        SizedBox(height: responsive.hp(15)),
+        // SizedBox(height: responsive.hp(15)),
 
         // Divider
         Container(
@@ -397,7 +498,7 @@ class _BasketPageState extends State<BasketPage> {
           // Navigate to checkout screen
           Get.to(() => CheckoutScreen(
                 items: controller.products,
-                subtotal: controller.total,
+                subtotal: controller.total.value,
                 deliveryCharge: 0.0,
               ));
         },

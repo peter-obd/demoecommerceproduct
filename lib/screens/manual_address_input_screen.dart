@@ -382,11 +382,245 @@ class _ManualAddressInputScreenState extends State<ManualAddressInputScreen> {
                               },
                             ),
                     ),
+                    SizedBox(height: responsive.hp(15)),
+                    // Add custom village button
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        _showCustomVillageDialog();
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: responsive.wp(20),
+                          vertical: responsive.hp(15),
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.primary.withOpacity(0.1),
+                              AppColors.lightBlue.withOpacity(0.1),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.3),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.add_circle_outline,
+                              color: AppColors.primary,
+                              size: responsive.wp(40),
+                            ),
+                            SizedBox(width: responsive.wp(10)),
+                            Text(
+                              'Can\'t find your village? Add manually',
+                              style: AppTextStyle.textStyle(
+                                responsive.sp(30),
+                                AppColors.primary,
+                                FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
             );
           },
+        );
+      },
+    );
+  }
+
+  Future<void> _showCustomVillageDialog() async {
+    final TextEditingController customVillageController =
+        TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        var responsive = Responsive(context);
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            padding: EdgeInsets.all(responsive.wp(30)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon and title
+                Container(
+                  padding: EdgeInsets.all(responsive.wp(15)),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primary.withOpacity(0.2),
+                        AppColors.lightBlue.withOpacity(0.2),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Icon(
+                    Icons.add_location_alt_rounded,
+                    color: AppColors.primary,
+                    size: responsive.wp(80),
+                  ),
+                ),
+                SizedBox(height: responsive.hp(20)),
+                Text(
+                  'Add Custom Village',
+                  style: AppTextStyle.textStyle(
+                    responsive.sp(40),
+                    AppColors.blackText,
+                    FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: responsive.hp(10)),
+                Text(
+                  'Enter your village/city name',
+                  style: AppTextStyle.textStyle(
+                    responsive.sp(30),
+                    AppColors.greyText,
+                    FontWeight.w400,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: responsive.hp(25)),
+                // Input field
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.greyBackground,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(0.2),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: TextField(
+                    controller: customVillageController,
+                    autofocus: true,
+                    style: AppTextStyle.textStyle(
+                      responsive.sp(32),
+                      AppColors.blackText,
+                      FontWeight.w600,
+                    ),
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: responsive.wp(20),
+                        vertical: responsive.hp(15),
+                      ),
+                      border: InputBorder.none,
+                      hintText: 'Enter village/city name',
+                      hintStyle: AppTextStyle.textStyle(
+                        responsive.sp(32),
+                        AppColors.greyText,
+                        FontWeight.w400,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.edit_location_alt,
+                        color: AppColors.primary,
+                        size: responsive.wp(45),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: responsive.hp(25)),
+                // Action buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            vertical: responsive.hp(15),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: AppTextStyle.textStyle(
+                            responsive.sp(32),
+                            AppColors.greyText,
+                            FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: responsive.wp(15)),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.primary,
+                              AppColors.primary.withOpacity(0.8),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            final customName =
+                                customVillageController.text.trim();
+                            if (customName.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text(
+                                      'Please enter a village/city name'),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              return;
+                            }
+
+                            // Create a custom city object with the entered name
+                            setState(() {
+                              selectedCity = City(
+                                code:
+                                    'CUSTOM_${DateTime.now().millisecondsSinceEpoch}',
+                                name: customName,
+                              );
+                            });
+                            Navigator.of(context).pop();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: EdgeInsets.symmetric(
+                              vertical: responsive.hp(15),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'Add',
+                            style: AppTextStyle.textStyle(
+                              responsive.sp(32),
+                              Colors.white,
+                              FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -514,454 +748,458 @@ class _ManualAddressInputScreenState extends State<ManualAddressInputScreen> {
               ),
             )
           : SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(responsive.wp(40)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // District Dropdown Section
-              Container(
-                padding: EdgeInsets.all(responsive.wp(30)),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white,
-                      AppColors.greyBackground.withOpacity(0.3),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.15),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.1),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
+              child: Padding(
+                padding: EdgeInsets.all(responsive.wp(40)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(responsive.wp(10)),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.primary,
-                                AppColors.primary.withOpacity(0.8),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            Icons.location_city,
-                            color: Colors.white,
-                            size: responsive.wp(40),
-                          ),
-                        ),
-                        SizedBox(width: responsive.wp(20)),
-                        Text(
-                          'District',
-                          style: AppTextStyle.textStyle(
-                            responsive.sp(36),
-                            AppColors.blackText,
-                            FontWeight.w700,
-                          ),
-                        ),
-                        Text(
-                          ' *',
-                          style: AppTextStyle.textStyle(
-                            responsive.sp(36),
-                            Colors.red,
-                            FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: responsive.hp(20)),
-                    GestureDetector(
-                      onTap: _showDistrictSearchDialog,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: responsive.wp(30),
-                          vertical: responsive.hp(20),
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.primary.withOpacity(0.2),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                selectedDistrict?.name ?? 'Select District',
-                                style: AppTextStyle.textStyle(
-                                  responsive.sp(32),
-                                  selectedDistrict != null
-                                      ? AppColors.blackText
-                                      : AppColors.greyText,
-                                  FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            Icon(
-                              Icons.arrow_drop_down,
-                              color: AppColors.primary,
-                              size: responsive.wp(60),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: responsive.hp(30)),
-
-              // Village/City Input Section
-              Container(
-                padding: EdgeInsets.all(responsive.wp(30)),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white,
-                      AppColors.greyBackground.withOpacity(0.3),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.15),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.1),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(responsive.wp(10)),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.primary,
-                                AppColors.primary.withOpacity(0.8),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            Icons.apartment,
-                            color: Colors.white,
-                            size: responsive.wp(40),
-                          ),
-                        ),
-                        SizedBox(width: responsive.wp(20)),
-                        Text(
-                          'Village/City',
-                          style: AppTextStyle.textStyle(
-                            responsive.sp(36),
-                            AppColors.blackText,
-                            FontWeight.w700,
-                          ),
-                        ),
-                        Text(
-                          ' *',
-                          style: AppTextStyle.textStyle(
-                            responsive.sp(36),
-                            Colors.red,
-                            FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: responsive.hp(20)),
-                    GestureDetector(
-                      onTap: _showCitySearchDialog,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: responsive.wp(30),
-                          vertical: responsive.hp(20),
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.primary.withOpacity(0.2),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                selectedCity?.name ?? 'Select Village/City',
-                                style: AppTextStyle.textStyle(
-                                  responsive.sp(32),
-                                  selectedCity != null
-                                      ? AppColors.blackText
-                                      : AppColors.greyText,
-                                  FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            Icon(
-                              Icons.arrow_drop_down,
-                              color: AppColors.primary,
-                              size: responsive.wp(60),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: responsive.hp(30)),
-
-              // Address Details Input Section
-              Container(
-                padding: EdgeInsets.all(responsive.wp(30)),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white,
-                      AppColors.greyBackground.withOpacity(0.3),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.15),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.1),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(responsive.wp(10)),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.primary.withOpacity(0.7),
-                                AppColors.lightBlue.withOpacity(0.7),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            Icons.details,
-                            color: Colors.white,
-                            size: responsive.wp(40),
-                          ),
-                        ),
-                        SizedBox(width: responsive.wp(20)),
-                        Column(
-                          children: [
-                            Text(
-                              'Address Details',
-                              style: AppTextStyle.textStyle(
-                                responsive.sp(36),
-                                AppColors.blackText,
-                                FontWeight.w700,
-                              ),
-                            ),
-                            SizedBox(height: responsive.wp(3)),
-                            Text(
-                              '(Optional)',
-                              style: AppTextStyle.textStyle(
-                                responsive.sp(28),
-                                AppColors.greyText,
-                                FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: responsive.hp(20)),
+                    // District Dropdown Section
                     Container(
+                      padding: EdgeInsets.all(responsive.wp(30)),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppColors.primary.withOpacity(0.2),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: TextField(
-                        controller: addressDetailsController,
-                        maxLines: 4,
-                        style: AppTextStyle.textStyle(
-                          responsive.sp(32),
-                          AppColors.blackText,
-                          FontWeight.w500,
-                        ),
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: responsive.wp(30),
-                            vertical: responsive.hp(20),
-                          ),
-                          border: InputBorder.none,
-                          hintText:
-                              'Building name, floor, apartment number, nearby landmarks...',
-                          hintStyle: AppTextStyle.textStyle(
-                            responsive.sp(30),
-                            AppColors.greyText,
-                            FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: responsive.hp(30)),
-
-              // Set as Default Checkbox
-              Container(
-                padding: EdgeInsets.all(responsive.wp(25)),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.1),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      value: isDefault,
-                      onChanged: (value) {
-                        setState(() {
-                          isDefault = value ?? false;
-                        });
-                      },
-                      activeColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                    ),
-                    SizedBox(width: responsive.wp(15)),
-                    Expanded(
-                      child: Text(
-                        'Set as default address',
-                        style: AppTextStyle.textStyle(
-                          responsive.sp(32),
-                          AppColors.blackText,
-                          FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: responsive.hp(50)),
-
-              // Save Button
-              Container(
-                width: double.infinity,
-                height: responsive.hp(60),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isLoading
-                        ? [
-                            AppColors.greyText.withOpacity(0.5),
-                            AppColors.greyText.withOpacity(0.3),
-                          ]
-                        : [
-                            AppColors.primary,
-                            AppColors.primary.withOpacity(0.8),
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white,
+                            AppColors.greyBackground.withOpacity(0.3),
                           ],
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: isLoading
-                      ? []
-                      : [
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.15),
+                          width: 1,
+                        ),
+                        boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.4),
+                            color: AppColors.primary.withOpacity(0.1),
                             blurRadius: 15,
-                            offset: const Offset(0, 6),
+                            offset: const Offset(0, 5),
                           ),
                         ],
-                ),
-                child: ElevatedButton(
-                  onPressed: isLoading ? null : _saveAddress,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: isLoading
-                      ? SizedBox(
-                          width: responsive.wp(50),
-                          height: responsive.wp(50),
-                          child: CircularProgressIndicator(
-                            color: AppColors.secondary,
-                            strokeWidth: 3,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(responsive.wp(10)),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppColors.primary,
+                                      AppColors.primary.withOpacity(0.8),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.location_city,
+                                  color: Colors.white,
+                                  size: responsive.wp(40),
+                                ),
+                              ),
+                              SizedBox(width: responsive.wp(20)),
+                              Text(
+                                'District',
+                                style: AppTextStyle.textStyle(
+                                  responsive.sp(36),
+                                  AppColors.blackText,
+                                  FontWeight.w700,
+                                ),
+                              ),
+                              Text(
+                                ' *',
+                                style: AppTextStyle.textStyle(
+                                  responsive.sp(36),
+                                  Colors.red,
+                                  FontWeight.w700,
+                                ),
+                              ),
+                            ],
                           ),
-                        )
-                      : Text(
-                          'Save Address',
-                          style: AppTextStyle.textStyle(
-                            responsive.sp(38),
-                            AppColors.secondary,
-                            FontWeight.w700,
+                          SizedBox(height: responsive.hp(20)),
+                          GestureDetector(
+                            onTap: _showDistrictSearchDialog,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: responsive.wp(30),
+                                vertical: responsive.hp(20),
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppColors.primary.withOpacity(0.2),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      selectedDistrict?.name ??
+                                          'Select District',
+                                      style: AppTextStyle.textStyle(
+                                        responsive.sp(32),
+                                        selectedDistrict != null
+                                            ? AppColors.blackText
+                                            : AppColors.greyText,
+                                        FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_drop_down,
+                                    color: AppColors.primary,
+                                    size: responsive.wp(60),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: responsive.hp(30)),
+
+                    // Village/City Input Section
+                    Container(
+                      padding: EdgeInsets.all(responsive.wp(30)),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white,
+                            AppColors.greyBackground.withOpacity(0.3),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.15),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.1),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(responsive.wp(10)),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppColors.primary,
+                                      AppColors.primary.withOpacity(0.8),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.apartment,
+                                  color: Colors.white,
+                                  size: responsive.wp(40),
+                                ),
+                              ),
+                              SizedBox(width: responsive.wp(20)),
+                              Text(
+                                'Village/City',
+                                style: AppTextStyle.textStyle(
+                                  responsive.sp(36),
+                                  AppColors.blackText,
+                                  FontWeight.w700,
+                                ),
+                              ),
+                              Text(
+                                ' *',
+                                style: AppTextStyle.textStyle(
+                                  responsive.sp(36),
+                                  Colors.red,
+                                  FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: responsive.hp(20)),
+                          GestureDetector(
+                            onTap: _showCitySearchDialog,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: responsive.wp(30),
+                                vertical: responsive.hp(20),
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppColors.primary.withOpacity(0.2),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      selectedCity?.name ??
+                                          'Select Village/City',
+                                      style: AppTextStyle.textStyle(
+                                        responsive.sp(32),
+                                        selectedCity != null
+                                            ? AppColors.blackText
+                                            : AppColors.greyText,
+                                        FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_drop_down,
+                                    color: AppColors.primary,
+                                    size: responsive.wp(60),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: responsive.hp(30)),
+
+                    // Address Details Input Section
+                    Container(
+                      padding: EdgeInsets.all(responsive.wp(30)),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white,
+                            AppColors.greyBackground.withOpacity(0.3),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.15),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.1),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(responsive.wp(10)),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppColors.primary.withOpacity(0.7),
+                                      AppColors.lightBlue.withOpacity(0.7),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.details,
+                                  color: Colors.white,
+                                  size: responsive.wp(40),
+                                ),
+                              ),
+                              SizedBox(width: responsive.wp(20)),
+                              Column(
+                                children: [
+                                  Text(
+                                    'Address Details',
+                                    style: AppTextStyle.textStyle(
+                                      responsive.sp(36),
+                                      AppColors.blackText,
+                                      FontWeight.w700,
+                                    ),
+                                  ),
+                                  SizedBox(height: responsive.wp(3)),
+                                  Text(
+                                    '(Optional)',
+                                    style: AppTextStyle.textStyle(
+                                      responsive.sp(28),
+                                      AppColors.greyText,
+                                      FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: responsive.hp(20)),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.primary.withOpacity(0.2),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: TextField(
+                              controller: addressDetailsController,
+                              maxLines: 4,
+                              style: AppTextStyle.textStyle(
+                                responsive.sp(32),
+                                AppColors.blackText,
+                                FontWeight.w500,
+                              ),
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: responsive.wp(30),
+                                  vertical: responsive.hp(20),
+                                ),
+                                border: InputBorder.none,
+                                hintText:
+                                    'Building name, floor, apartment number, nearby landmarks...',
+                                hintStyle: AppTextStyle.textStyle(
+                                  responsive.sp(30),
+                                  AppColors.greyText,
+                                  FontWeight.w400,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: responsive.hp(30)),
+
+                    // Set as Default Checkbox
+                    Container(
+                      padding: EdgeInsets.all(responsive.wp(25)),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.1),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: isDefault,
+                            onChanged: (value) {
+                              setState(() {
+                                isDefault = value ?? false;
+                              });
+                            },
+                            activeColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                          ),
+                          SizedBox(width: responsive.wp(15)),
+                          Expanded(
+                            child: Text(
+                              'Set as default address',
+                              style: AppTextStyle.textStyle(
+                                responsive.sp(32),
+                                AppColors.blackText,
+                                FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: responsive.hp(50)),
+
+                    // Save Button
+                    Container(
+                      width: double.infinity,
+                      height: responsive.hp(60),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: isLoading
+                              ? [
+                                  AppColors.greyText.withOpacity(0.5),
+                                  AppColors.greyText.withOpacity(0.3),
+                                ]
+                              : [
+                                  AppColors.primary,
+                                  AppColors.primary.withOpacity(0.8),
+                                ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: isLoading
+                            ? []
+                            : [
+                                BoxShadow(
+                                  color: AppColors.primary.withOpacity(0.4),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: isLoading ? null : _saveAddress,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
                         ),
+                        child: isLoading
+                            ? SizedBox(
+                                width: responsive.wp(50),
+                                height: responsive.wp(50),
+                                child: CircularProgressIndicator(
+                                  color: AppColors.secondary,
+                                  strokeWidth: 3,
+                                ),
+                              )
+                            : Text(
+                                'Save Address',
+                                style: AppTextStyle.textStyle(
+                                  responsive.sp(38),
+                                  AppColors.secondary,
+                                  FontWeight.w700,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

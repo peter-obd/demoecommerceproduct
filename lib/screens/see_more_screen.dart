@@ -90,9 +90,10 @@ class _SeeMoreScreenState extends State<SeeMoreScreen> {
             children: [
               // Enhanced Back Button
               GestureDetector(
-                onTap: () => Get.back(),
+                onTap: () => Get.back(result: true),
                 child: Container(
-                  padding: EdgeInsets.all(responsive.wp(12)),
+                  width: responsive.wp(50),
+                  height: responsive.hp(55),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(15),
@@ -104,10 +105,12 @@ class _SeeMoreScreenState extends State<SeeMoreScreen> {
                       ),
                     ],
                   ),
-                  child: Icon(
-                    Icons.arrow_back_ios_rounded,
-                    color: AppColors.blackText,
-                    size: responsive.sp(45),
+                  child: Center(
+                    child: Icon(
+                      Icons.arrow_back_ios_rounded,
+                      color: AppColors.blackText,
+                      size: responsive.sp(40),
+                    ),
                   ),
                 ),
               ),
@@ -137,17 +140,22 @@ class _SeeMoreScreenState extends State<SeeMoreScreen> {
                     ),
                     child: Row(
                       children: [
-                        SizedBox(width: responsive.wp(20)),
+                        SizedBox(width: responsive.wp(15)),
                         Container(
-                          padding: EdgeInsets.all(responsive.wp(8)),
+                          // padding: EdgeInsets.all(responsive.wp(8)),
+                          height: responsive.hp(35),
+
+                          width: responsive.wp(40),
                           decoration: BoxDecoration(
                             color: AppColors.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(
-                            Icons.search,
-                            color: AppColors.primary,
-                            size: responsive.sp(35),
+                          child: Center(
+                            child: Icon(
+                              Icons.search,
+                              color: AppColors.primary,
+                              size: responsive.sp(35),
+                            ),
                           ),
                         ),
                         SizedBox(width: responsive.wp(15)),
@@ -289,142 +297,222 @@ class _SeeMoreScreenState extends State<SeeMoreScreen> {
         return _buildEnhancedEmptyState(responsive);
       }
 
-      return Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: responsive.wp(20),
-            // vertical: responsive.hp(10),
-          ),
-          child: Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.zero,
-              controller: _scrollController,
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: responsive.wp(15),
-                      mainAxisSpacing: responsive.hp(15),
-                      childAspectRatio: 0.7,
-                    ),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return GestureDetector(
-                        onTap: () async {
-                          final onValue = await IsarService.instance
-                              .getProductWithAllRelations(product.id);
-                          Get.to(ProductDetailsScreen(product: onValue!));
-                        },
-                        child: EnhancedProductCard(
-                          product: product,
-                          responsive: responsive,
-                        ),
-                      );
-                    },
-                  ),
-
-                  /// ---- Loading more at the BOTTOM ----
-                  if (controller.isScrollLoading.value)
-                    Container(
-                      padding: EdgeInsets.only(
-                        left: responsive.wp(20),
-                        right: responsive.wp(20),
-                        top: responsive.hp(20),
-                        bottom: responsive.hp(20) +
-                            MediaQuery.of(context).padding.bottom,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const CircularProgressIndicator(
-                            color: AppColors.primary,
-                            strokeWidth: 2,
-                          ),
-                          SizedBox(width: responsive.wp(15)),
-                          Text(
-                            'Loading more products...',
-                            style: AppTextStyle.textStyle(
-                              responsive.sp(32),
-                              AppColors.greyText,
-                              FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
+      return SingleChildScrollView(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.symmetric(
+          horizontal: responsive.wp(20),
+        ),
+        child: Column(
+          children: [
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: responsive.wp(15),
+                mainAxisSpacing: responsive.hp(15),
+                childAspectRatio: 0.7,
               ),
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return GestureDetector(
+                  onTap: () async {
+                    final onValue = await IsarService.instance
+                        .getProductWithAllRelations(product.id);
+                    Get.to(ProductDetailsScreen(product: onValue!));
+                  },
+                  child: EnhancedProductCard(
+                    product: product,
+                    responsive: responsive,
+                  ),
+                );
+              },
             ),
-          )
-          // Column(
-          //   children: [
-          //     Expanded(
-          //       child: GridView.builder(
-          //         controller: _scrollController,
-          //         physics: const BouncingScrollPhysics(),
-          //         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          //           crossAxisCount: 2,
-          //           crossAxisSpacing: responsive.wp(15),
-          //           mainAxisSpacing: responsive.hp(15),
-          //           childAspectRatio: 0.7,
-          //         ),
-          //         itemCount: products.length,
-          //         itemBuilder: (context, index) {
-          //           final product = products[index];
-          //           return GestureDetector(
-          //             onTap: () async {
-          //               await IsarService.instance
-          //                   .getProductWithAllRelations(product.id)
-          //                   .then((onValue) {
-          //                 Get.to(ProductDetailsScreen(product: onValue!));
-          //               });
-          //               // Get.to(ProductDetailsScreen(product: product));
-          //             },
-          //             child: EnhancedProductCard(
-          //               product: product,
-          //               responsive: responsive,
-          //             ),
-          //           );
-          //         },
-          //       ),
-          //     ),
-          //     if (controller.isScrollLoading.value)
-          //       Container(
-          //         padding: EdgeInsets.only(
-          //           left: responsive.wp(20),
-          //           right: responsive.wp(20),
-          //           top: responsive.hp(20),
-          //           bottom:
-          //               responsive.hp(20) + MediaQuery.of(context).padding.bottom,
-          //         ),
-          //         child: Row(
-          //           mainAxisAlignment: MainAxisAlignment.center,
-          //           children: [
-          //             const CircularProgressIndicator(
-          //               color: AppColors.primary,
-          //               strokeWidth: 2,
-          //             ),
-          //             SizedBox(width: responsive.wp(15)),
-          //             Text(
-          //               'Loading more products...',
-          //               style: AppTextStyle.textStyle(
-          //                 responsive.sp(32),
-          //                 AppColors.greyText,
-          //                 FontWeight.w500,
-          //               ),
-          //             ),
-          //           ],
-          //         ),
-          //       )
-          //   ],
-          // ),
-          );
+
+            // Loading indicator at bottom
+            if (controller.isScrollLoading.value)
+              Container(
+                padding: EdgeInsets.only(
+                  top: responsive.hp(20),
+                  bottom:
+                      responsive.hp(20) + MediaQuery.of(context).padding.bottom,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(
+                      color: AppColors.primary,
+                      strokeWidth: 2,
+                    ),
+                    SizedBox(width: responsive.wp(15)),
+                    Text(
+                      'Loading more products...',
+                      style: AppTextStyle.textStyle(
+                        responsive.sp(32),
+                        AppColors.greyText,
+                        FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      );
     });
   }
+  // Widget _buildEnhancedProductsGrid(Responsive responsive) {
+  //   return Obx(() {
+  //     if (controller.isLoading.value) {
+  //       return _buildEnhancedLoadingState(responsive);
+  //     }
+
+  //     final products = controller.productsOfCategory;
+
+  //     if (products.isEmpty) {
+  //       return _buildEnhancedEmptyState(responsive);
+  //     }
+
+  //     return Padding(
+  //         padding: EdgeInsets.symmetric(
+  //           horizontal: responsive.wp(20),
+  //           // vertical: responsive.hp(10),
+  //         ),
+  //         child: Expanded(
+  //           child: SingleChildScrollView(
+  //             padding: EdgeInsets.zero,
+  //             controller: _scrollController,
+  //             physics: const BouncingScrollPhysics(),
+  //             child: Column(
+  //               children: [
+  //                 Expanded(
+  //                   child: GridView.builder(
+  //                     shrinkWrap: true,
+  //                     physics: const NeverScrollableScrollPhysics(),
+  //                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+  //                       crossAxisCount: 2,
+  //                       crossAxisSpacing: responsive.wp(15),
+  //                       mainAxisSpacing: responsive.hp(15),
+  //                       childAspectRatio: 0.7,
+  //                     ),
+  //                     itemCount: products.length,
+  //                     itemBuilder: (context, index) {
+  //                       final product = products[index];
+  //                       return GestureDetector(
+  //                         onTap: () async {
+  //                           final onValue = await IsarService.instance
+  //                               .getProductWithAllRelations(product.id);
+  //                           Get.to(ProductDetailsScreen(product: onValue!));
+  //                         },
+  //                         child: EnhancedProductCard(
+  //                           product: product,
+  //                           responsive: responsive,
+  //                         ),
+  //                       );
+  //                     },
+  //                   ),
+  //                 ),
+
+  //                 /// ---- Loading more at the BOTTOM ----
+  //                 if (controller.isScrollLoading.value)
+  //                   Container(
+  //                     padding: EdgeInsets.only(
+  //                       left: responsive.wp(20),
+  //                       right: responsive.wp(20),
+  //                       top: responsive.hp(20),
+  //                       bottom: responsive.hp(20) +
+  //                           MediaQuery.of(context).padding.bottom,
+  //                     ),
+  //                     child: Row(
+  //                       mainAxisAlignment: MainAxisAlignment.center,
+  //                       children: [
+  //                         const CircularProgressIndicator(
+  //                           color: AppColors.primary,
+  //                           strokeWidth: 2,
+  //                         ),
+  //                         SizedBox(width: responsive.wp(15)),
+  //                         Text(
+  //                           'Loading more products...',
+  //                           style: AppTextStyle.textStyle(
+  //                             responsive.sp(32),
+  //                             AppColors.greyText,
+  //                             FontWeight.w500,
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //               ],
+  //             ),
+  //           ),
+  //         )
+  //         // Column(
+  //         //   children: [
+  //         //     Expanded(
+  //         //       child: GridView.builder(
+  //         //         controller: _scrollController,
+  //         //         physics: const BouncingScrollPhysics(),
+  //         //         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+  //         //           crossAxisCount: 2,
+  //         //           crossAxisSpacing: responsive.wp(15),
+  //         //           mainAxisSpacing: responsive.hp(15),
+  //         //           childAspectRatio: 0.7,
+  //         //         ),
+  //         //         itemCount: products.length,
+  //         //         itemBuilder: (context, index) {
+  //         //           final product = products[index];
+  //         //           return GestureDetector(
+  //         //             onTap: () async {
+  //         //               await IsarService.instance
+  //         //                   .getProductWithAllRelations(product.id)
+  //         //                   .then((onValue) {
+  //         //                 Get.to(ProductDetailsScreen(product: onValue!));
+  //         //               });
+  //         //               // Get.to(ProductDetailsScreen(product: product));
+  //         //             },
+  //         //             child: EnhancedProductCard(
+  //         //               product: product,
+  //         //               responsive: responsive,
+  //         //             ),
+  //         //           );
+  //         //         },
+  //         //       ),
+  //         //     ),
+  //         //     if (controller.isScrollLoading.value)
+  //         //       Container(
+  //         //         padding: EdgeInsets.only(
+  //         //           left: responsive.wp(20),
+  //         //           right: responsive.wp(20),
+  //         //           top: responsive.hp(20),
+  //         //           bottom:
+  //         //               responsive.hp(20) + MediaQuery.of(context).padding.bottom,
+  //         //         ),
+  //         //         child: Row(
+  //         //           mainAxisAlignment: MainAxisAlignment.center,
+  //         //           children: [
+  //         //             const CircularProgressIndicator(
+  //         //               color: AppColors.primary,
+  //         //               strokeWidth: 2,
+  //         //             ),
+  //         //             SizedBox(width: responsive.wp(15)),
+  //         //             Text(
+  //         //               'Loading more products...',
+  //         //               style: AppTextStyle.textStyle(
+  //         //                 responsive.sp(32),
+  //         //                 AppColors.greyText,
+  //         //                 FontWeight.w500,
+  //         //               ),
+  //         //             ),
+  //         //           ],
+  //         //         ),
+  //         //       )
+  //         //   ],
+  //         // ),
+  //         );
+  //   });
+  // }
 
   Widget _buildEnhancedLoadingState(Responsive responsive) {
     return Container(

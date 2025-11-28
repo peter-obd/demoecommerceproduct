@@ -79,6 +79,7 @@ class HomeController extends GetxController {
 
   void getProductsByCategory(
       String categoryId, String pageSize, String pageNumebr) {
+    hasNextPage.value = true;
     selectedCategoryId.value = categoryId;
     pageNumber.value = 1;
     for (int i = 0; i < categories.length; i++) {

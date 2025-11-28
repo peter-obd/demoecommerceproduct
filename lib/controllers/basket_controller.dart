@@ -4,8 +4,8 @@ import 'package:demoecommerceproduct/screens/pages/basket_page.dart';
 import 'package:demoecommerceproduct/screens/product_details_screen.dart';
 import 'package:demoecommerceproduct/services/apis_service.dart';
 import 'package:demoecommerceproduct/services/basket_service.dart';
-import 'package:demoecommerceproduct/services/isar_service.dart';
 import 'package:demoecommerceproduct/utilities/Utils.dart';
+import 'package:demoecommerceproduct/widgets/loading_widget.dart';
 import 'package:demoecommerceproduct/widgets/order_success_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,7 +14,7 @@ class BasketController extends GetxController {
   var products = <CheckoutProduct>[].obs;
   RxBool isLoading = false.obs;
   RxString addressId = "".obs;
-  var total;
+  RxDouble total = 0.0.obs;
 
   @override
   void onInit() {
@@ -25,7 +25,7 @@ class BasketController extends GetxController {
 
   void getCheckoutProducts() async {
     products.value = await BasketService.instance.getBasketProducts();
-    total = await BasketService.instance.getBasketTotal();
+    total.value = await BasketService.instance.getBasketTotal();
     update();
   }
 
@@ -35,11 +35,32 @@ class BasketController extends GetxController {
   }
 
   void productTapped(CheckoutProduct product) async {
-    await IsarService.instance
-        .getProductWithAllRelations(product.productId)
-        .then((onValue) {
-      Get.to(ProductDetailsScreen(product: onValue!));
-    });
+    // Show loading indicator
+    FullScreenLoader.show();
+
+    // Fetch product details from API
+    ApisService.getProductByProductId(
+      product.productId,
+      (productData) {
+        // Hide loading indicator
+        FullScreenLoader.hide();
+
+        // Navigate to ProductDetailsScreen with the specific variant
+        Get.to(() => ProductDetailsScreen(
+              product: productData,
+              variantId: product.variantId,
+            ));
+      },
+      (error) {
+        // Hide loading indicator
+        FullScreenLoader.hide();
+
+        // Show error message
+        if (Get.context != null) {
+          Utils.showFlushbarError(Get.context!, error.message);
+        }
+      },
+    );
   }
 
   void removeProduct(CheckoutProduct product) async {
@@ -49,7 +70,8 @@ class BasketController extends GetxController {
   }
 
   void checkoutOrder(BuildContext context) async {
-    isLoading.value = true;
+    // isLoading.value = true;
+    FullScreenLoader.show();
     List<OnCheckoutOrderProductModel> onCheckoutOrderProducts = [];
     for (var product in products) {
       onCheckoutOrderProducts.add(OnCheckoutOrderProductModel(
@@ -59,11 +81,11 @@ class BasketController extends GetxController {
     }
     ApisService.checkoutOrder("", addressId.value, onCheckoutOrderProducts,
         (success) {
-      isLoading.value = false;
       products.clear();
       BasketService.instance.clearBasket();
 
       // Show success dialog
+      FullScreenLoader.hide();
       showDialog(
         context: context,
         barrierDismissible: false, // Prevent dismissal by tapping outside
@@ -77,7 +99,7 @@ class BasketController extends GetxController {
         },
       );
     }, (fail) {
-      isLoading.value = false;
+      FullScreenLoader.hide();
       Utils.showFlushbarError(context, fail.message);
     });
   }

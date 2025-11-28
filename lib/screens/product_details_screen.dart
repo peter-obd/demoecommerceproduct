@@ -17,8 +17,12 @@ import 'package:get/get.dart';
 class ProductDetailsScreen extends StatefulWidget {
   final ProductItem product;
   final bool? isFromFavorites;
+  final String? variantId; // Specific variant to display (from basket)
   const ProductDetailsScreen(
-      {super.key, required this.product, this.isFromFavorites});
+      {super.key,
+      required this.product,
+      this.isFromFavorites,
+      this.variantId});
 
   @override
   State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
@@ -115,7 +119,27 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     // Check if variants exist before accessing them
     final allVariants = widget.product.allVariants;
     if (allVariants.isNotEmpty) {
-      _selectedVariant = allVariants.first;
+      // If variantId is provided (from basket), try to find that specific variant
+      if (widget.variantId != null) {
+        final specificVariant = allVariants.firstWhere(
+          (variant) => variant.id == widget.variantId,
+          orElse: () => allVariants.first,
+        );
+        _selectedVariant = specificVariant;
+      } else {
+        // Try to find the first variant with stock available
+        ProductVariant? variantWithStock;
+        for (final variant in allVariants) {
+          if (variant.stock > 0) {
+            variantWithStock = variant;
+            break;
+          }
+        }
+
+        // Use the variant with stock if found, otherwise use the first variant
+        _selectedVariant = variantWithStock ?? allVariants.first;
+      }
+
       _selectedAttributes = _selectedVariant
           .getAttributesValues()
           .map((k, v) => MapEntry(k, v.toString()));

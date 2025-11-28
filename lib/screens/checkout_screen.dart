@@ -30,6 +30,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   List<UserAddress> _addresses = [];
   UserAddress? _selectedAddress;
   bool _isLoading = true;
+  bool _isCheckoutExpanded = false; // State for expandable checkout section
   final BasketController _basketController = Get.find<BasketController>();
 
   @override
@@ -101,35 +102,47 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.greyBackground,
-      body: Column(
+      body: Stack(
         children: [
-          _buildHeader(responsive),
-          Expanded(
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
-                    ),
-                  )
-                : SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Padding(
-                      padding: EdgeInsets.all(responsive.wp(20)),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildAddressSection(responsive),
-                          SizedBox(height: responsive.hp(20)),
-                          _buildOrderSummarySection(responsive),
-                          SizedBox(height: responsive.hp(20)),
-                          _buildOrderItemsSection(responsive),
-                          SizedBox(height: responsive.hp(120)),
-                        ],
+          Column(
+            children: [
+              _buildHeader(responsive),
+              Expanded(
+                child: _isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Padding(
+                          padding: EdgeInsets.all(responsive.wp(20)),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildAddressSection(responsive),
+                              SizedBox(height: responsive.hp(20)),
+                              _buildOrderSummarySection(responsive),
+                              SizedBox(height: responsive.hp(20)),
+                              _buildOrderItemsSection(responsive),
+                              SizedBox(height: responsive.hp(100)),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+              ),
+            ],
           ),
-          if (!_isLoading) _buildCheckoutButton(responsive),
+          // Floating checkout button
+          if (!_isLoading)
+            Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(
+                  child: _buildCheckoutButton(responsive),
+                )),
         ],
       ),
     );
@@ -270,7 +283,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   'Add New Address',
                   Icons.add_location_alt_rounded,
                   () async {
-                    final result = await Get.to(() => const ManualAddressInputScreen());
+                    final result =
+                        await Get.to(() => const ManualAddressInputScreen());
                     if (result != null) {
                       // Address was successfully added, reload and select the newest one
                       _loadAddresses(selectNewest: true);
@@ -786,85 +800,228 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final canCheckout = _addresses.isNotEmpty &&
         _selectedAddress != null &&
         _selectedAddress!.id.isNotEmpty;
+    final total = widget.subtotal + widget.deliveryCharge;
 
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: responsive.wp(20),
+        vertical: responsive.hp(12),
+      ),
+      child: SafeArea(
+        child: GestureDetector(
+          onTap: () {
+            setState(() {
+              _isCheckoutExpanded = !_isCheckoutExpanded;
+            });
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            padding: EdgeInsets.symmetric(
+              horizontal: responsive.wp(20),
+              vertical: responsive.hp(15),
+            ),
+            decoration: BoxDecoration(
+              color: _isCheckoutExpanded
+                  ? AppColors.primary
+                  : AppColors.primary.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(25),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.15),
+                  blurRadius: 25,
+                  offset: const Offset(0, -5),
+                  spreadRadius: 3,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Collapsed view - Always visible
+                _buildCollapsedCheckoutView(responsive, total),
+
+                // Expanded content - Shows when expanded
+                AnimatedCrossFade(
+                  firstChild: const SizedBox.shrink(),
+                  secondChild: Column(
+                    children: [
+                      SizedBox(height: responsive.hp(20)),
+                      // Order Summary in expanded state
+                      _buildCompactOrderSummary(responsive),
+                      SizedBox(height: responsive.hp(20)),
+                      // Place Order Button
+                      _buildPlaceOrderButton(responsive, canCheckout),
+                    ],
+                  ),
+                  crossFadeState: _isCheckoutExpanded
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+                  duration: const Duration(milliseconds: 300),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCollapsedCheckoutView(Responsive responsive, double total) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Total and action text
+        Expanded(
+          child: Row(
+            children: [
+              // Total label and price
+              Text(
+                'Total: ',
+                style: AppTextStyle.textStyle(
+                  responsive.sp(40),
+                  AppColors.blackText,
+                  FontWeight.bold,
+                ),
+              ),
+              Text(
+                '\$${total.toStringAsFixed(0)}',
+                style: AppTextStyle.textStyle(
+                  responsive.sp(38),
+                  Colors.white,
+                  FontWeight.w500,
+                ),
+              ),
+              SizedBox(width: responsive.wp(8)),
+              // Separator
+              Container(
+                height: responsive.hp(25),
+                width: 1.5,
+                color: AppColors.blackText.withOpacity(0.8),
+              ),
+              SizedBox(width: responsive.wp(8)),
+              // Press to place order text
+              Expanded(
+                child: Text(
+                  'Press to Place order',
+                  style: AppTextStyle.textStyle(
+                    responsive.sp(32),
+                    AppColors.blackText,
+                    FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Expand/Collapse indicator
+        Container(
+          padding: EdgeInsets.all(responsive.wp(10)),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: AnimatedRotation(
+            turns: _isCheckoutExpanded ? 0.5 : 0,
+            duration: const Duration(milliseconds: 300),
+            child: Icon(
+              Icons.keyboard_arrow_up_rounded,
+              color: Colors.white,
+              size: responsive.sp(38),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompactOrderSummary(Responsive responsive) {
     return Container(
       padding: EdgeInsets.all(responsive.wp(20)),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-            spreadRadius: 2,
+        color: AppColors.greyBackground.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        children: [
+          _buildSummaryRow(responsive, 'Subtotal',
+              '\$${widget.subtotal.toStringAsFixed(0)}'),
+          SizedBox(height: responsive.hp(10)),
+          _buildSummaryRow(
+            responsive,
+            'Delivery Charge',
+            widget.deliveryCharge == 0
+                ? 'Free'
+                : '\$${widget.deliveryCharge.toStringAsFixed(0)}',
+            isDelivery: true,
           ),
         ],
       ),
-      child: SafeArea(
-        child: Container(
-          width: double.infinity,
-          height: responsive.hp(70),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: canCheckout
-                  ? [
-                      AppColors.primary,
-                      AppColors.primary.withOpacity(0.8),
-                    ]
-                  : [
-                      AppColors.greyText.withOpacity(0.5),
-                      AppColors.greyText.withOpacity(0.3),
-                    ],
-            ),
+    );
+  }
+
+  Widget _buildPlaceOrderButton(Responsive responsive, bool canCheckout) {
+    return Container(
+      width: double.infinity,
+      height: responsive.hp(70),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: canCheckout
+              ? [
+                  Colors.white,
+                  Colors.white.withOpacity(0.8),
+                ]
+              : [
+                  AppColors.greyText.withOpacity(0.5),
+                  AppColors.greyText.withOpacity(0.3),
+                ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: canCheckout
+            ? [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ]
+            : [],
+      ),
+      child: ElevatedButton(
+        onPressed: canCheckout && !_basketController.isLoading.value
+            ? _handleCheckout
+            : null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            boxShadow: canCheckout
-                ? [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ]
-                : [],
-          ),
-          child: ElevatedButton(
-            onPressed: canCheckout && !_basketController.isLoading.value
-                ? _handleCheckout
-                : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-            child: Obx(() => _basketController.isLoading.value
-                ? const CircularProgressIndicator(
-                    color: Colors.white,
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.payment_rounded,
-                        color: Colors.white,
-                        size: responsive.sp(45),
-                      ),
-                      SizedBox(width: responsive.wp(15)),
-                      Text(
-                        canCheckout
-                            ? 'Place Order'
-                            : 'Select Address to Continue',
-                        style: AppTextStyle.textStyle(
-                          responsive.sp(40),
-                          Colors.white,
-                          FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  )),
           ),
         ),
+        child: Obx(() => _basketController.isLoading.value
+            ? const CircularProgressIndicator(
+                color: Colors.white,
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.payment_rounded,
+                    color: AppColors.primary,
+                    size: responsive.sp(45),
+                  ),
+                  SizedBox(width: responsive.wp(15)),
+                  Text(
+                    canCheckout ? 'Place Order' : 'Select Address to Continue',
+                    style: AppTextStyle.textStyle(
+                      responsive.sp(40),
+                      AppColors.primary,
+                      FontWeight.w700,
+                    ),
+                  ),
+                ],
+              )),
       ),
     );
   }
