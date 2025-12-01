@@ -1,3 +1,4 @@
+import 'package:demoecommerceproduct/widgets/loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:demoecommerceproduct/values/responsive.dart';
 import 'package:demoecommerceproduct/values/colors.dart';

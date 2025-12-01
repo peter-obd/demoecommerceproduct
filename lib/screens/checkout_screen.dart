@@ -30,7 +30,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   List<UserAddress> _addresses = [];
   UserAddress? _selectedAddress;
   bool _isLoading = true;
-  bool _isCheckoutExpanded = false; // State for expandable checkout section
+  bool _isCheckoutExpanded = true; // State for expandable checkout section
   final BasketController _basketController = Get.find<BasketController>();
 
   @override
@@ -126,7 +126,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               _buildOrderSummarySection(responsive),
                               SizedBox(height: responsive.hp(20)),
                               _buildOrderItemsSection(responsive),
-                              SizedBox(height: responsive.hp(100)),
+                              // SizedBox(height: responsive.hp(100)),
+                              if (!_isLoading)
+                                // Positioned(
+                                //     bottom: 0,
+                                //     left: 0,
+                                //     right: 0,
+                                //     child:
+                                SafeArea(
+                                  child: _buildCheckoutButton(responsive),
+                                  // )
+                                ),
                             ],
                           ),
                         ),
@@ -135,14 +145,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ],
           ),
           // Floating checkout button
-          if (!_isLoading)
-            Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: SafeArea(
-                  child: _buildCheckoutButton(responsive),
-                )),
         ],
       ),
     );
@@ -804,15 +806,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: responsive.wp(20),
-        vertical: responsive.hp(12),
-      ),
+          // horizontal: responsive.wp(20),
+          // vertical: responsive.hp(12),
+          ),
       child: SafeArea(
         child: GestureDetector(
           onTap: () {
-            setState(() {
-              _isCheckoutExpanded = !_isCheckoutExpanded;
-            });
+            // setState(() {
+            //   _isCheckoutExpanded = !_isCheckoutExpanded;
+            // });
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
@@ -823,13 +825,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             decoration: BoxDecoration(
               color: _isCheckoutExpanded
-                  ? AppColors.primary
-                  : AppColors.primary.withOpacity(0.8),
+                  ? Colors.white
+                  : Colors.white.withOpacity(0.8),
               borderRadius: BorderRadius.circular(25),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.primary.withOpacity(0.15),
-                  blurRadius: 25,
+                  blurRadius: 15,
                   offset: const Offset(0, -5),
                   spreadRadius: 3,
                 ),
@@ -839,7 +841,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Collapsed view - Always visible
-                _buildCollapsedCheckoutView(responsive, total),
+                // _buildCollapsedCheckoutView(responsive, total),
 
                 // Expanded content - Shows when expanded
                 AnimatedCrossFade(
@@ -940,7 +942,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Container(
       padding: EdgeInsets.all(responsive.wp(20)),
       decoration: BoxDecoration(
-        color: AppColors.greyBackground.withOpacity(0.3),
+        color: AppColors.greyBackground.withOpacity(0.8),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Column(
@@ -969,8 +971,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         gradient: LinearGradient(
           colors: canCheckout
               ? [
-                  Colors.white,
-                  Colors.white.withOpacity(0.8),
+                  AppColors.primary,
+                  AppColors.primary.withOpacity(0.8),
                 ]
               : [
                   AppColors.greyText.withOpacity(0.5),
@@ -1008,7 +1010,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 children: [
                   Icon(
                     Icons.payment_rounded,
-                    color: AppColors.primary,
+                    color: Colors.white,
                     size: responsive.sp(45),
                   ),
                   SizedBox(width: responsive.wp(15)),
@@ -1016,7 +1018,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     canCheckout ? 'Place Order' : 'Select Address to Continue',
                     style: AppTextStyle.textStyle(
                       responsive.sp(40),
-                      AppColors.primary,
+                      Colors.white,
                       FontWeight.w700,
                     ),
                   ),
@@ -1045,10 +1047,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     // Navigate back to basket page after successful checkout
     // The BasketController will handle success/error messages
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (!_basketController.isLoading.value) {
-        Get.back(); // Go back to basket
-      }
-    });
+    // Future.delayed(const Duration(milliseconds: 500), () {
+    //   if (!_basketController.isLoading.value) {
+    //     Get.back(); // Go back to basket
+    //   }
+    // });
   }
 }

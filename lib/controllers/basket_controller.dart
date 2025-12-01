@@ -111,8 +111,46 @@ class BasketController extends GetxController {
           variantId: product.variantId);
       getCheckoutProducts();
     } else {
-      Utils.showFlushbarError(
-          Get.context!, "There is no more then ${product.stock} in stock");
+      FullScreenLoader.show();
+      ApisService.getProductByProductId(
+        product.productId,
+        (productData) async {
+          // Hide loading indicator
+
+          var variants = productData.allVariants;
+          for (var variant in variants) {
+            if (variant.id == product.variantId) {
+              if (variant.stock > product.quantity) {
+                FullScreenLoader.hide();
+                await BasketService.instance.updateQuantity(
+                    product.productId, product.quantity + 1,
+                    variantId: product.variantId);
+                getCheckoutProducts();
+              } else {
+                FullScreenLoader.hide();
+                Utils.showFlushbarError(Get.context!,
+                    "There is no more then ${variant.stock} in stock");
+              }
+              return;
+            } else {
+              FullScreenLoader.hide();
+              Utils.showFlushbarError(Get.context!, "variant not found");
+              return;
+            }
+          }
+        },
+        (error) {
+          // Hide loading indicator
+          FullScreenLoader.hide();
+
+          // Show error message
+          if (Get.context != null) {
+            Utils.showFlushbarError(Get.context!, error.message);
+          }
+        },
+      );
+      // Utils.showFlushbarError(
+      //     Get.context!, "There is no more then ${product.stock} in stock");
     }
   }
 

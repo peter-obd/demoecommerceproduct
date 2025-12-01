@@ -146,7 +146,7 @@ class AppRequestManager {
 
   static void postWithToken(
       String url,
-      Map<String, dynamic>? params,
+      dynamic params,
       Map<String, String>? extraHeaders,
       bool raw,
       bool withAuth,
@@ -286,7 +286,7 @@ class AppRequestManager {
 
   static void putWithToken(
       String url,
-      Map<String, dynamic>? params,
+      dynamic params,
       Map<String, String>? extraHeaders,
       bool raw,
       bool withAuth,

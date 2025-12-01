@@ -53,7 +53,7 @@ class RequestManager {
 
   static void post(
       String url,
-      Map<String, dynamic>? params,
+      dynamic params,
       Map<String, String>? headers,
       bool raw,
       RequestSuccess success,
@@ -104,7 +104,7 @@ class RequestManager {
 
   static void put(
       String url,
-      Map<String, dynamic>? params,
+      dynamic params,
       Map<String, String>? headers,
       bool raw,
       RequestSuccess success,

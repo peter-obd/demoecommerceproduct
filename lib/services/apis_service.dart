@@ -7,6 +7,7 @@ import 'package:demoecommerceproduct/models/order_model.dart';
 import 'package:demoecommerceproduct/models/product/product_data_model.dart';
 import 'package:demoecommerceproduct/models/product/product_model.dart';
 import 'package:demoecommerceproduct/models/search_model.dart';
+import 'package:demoecommerceproduct/models/stock_availability_model.dart';
 import 'package:demoecommerceproduct/models/user.dart';
 import 'package:demoecommerceproduct/models/user_address_model.dart';
 import 'package:demoecommerceproduct/networking/app_request_manager.dart';
@@ -27,6 +28,7 @@ typedef SetDefaultAddressSuccess = Function(UserAddress updatedAddress);
 typedef GetDefaultAddressSuccess = Function(UserAddress? defaultAddress);
 typedef ProductByIdSuccess = Function(ProductItem productData);
 typedef DistrictsSuccess = Function(List<District> districts);
+typedef StockAvailabilitySuccess = Function(StockAvailabilityResponse response);
 
 class ApisService {
   static const String _baseUrl = "https://onedollarapp.onrender.com/";
@@ -617,6 +619,28 @@ class ApisService {
         }
       } catch (e) {
         debugPrint("Could not parse districts: ${e.toString()}");
+      }
+    }, (error) => fail(error));
+  }
+
+  static void checkStockAvailability(
+      List<StockCheckItem> items,
+      StockAvailabilitySuccess success,
+      RequestFail fail) {
+    var urlMethod = "Order/check-stock-availability";
+    var url = _baseUrl + _urlPath + urlMethod;
+    var params = items.map((item) => item.toJson()).toList();
+
+    AppRequestManager.postWithToken(url, params, null, true, true, (response) {
+      try {
+        Map<String, dynamic> result = json.decode(response);
+        if (result['success'] == true && result['data'] != null) {
+          StockAvailabilityResponse stockResponse =
+              StockAvailabilityResponse.fromJson(result['data']);
+          success(stockResponse);
+        }
+      } catch (e) {
+        debugPrint("Could not parse stock availability: ${e.toString()}");
       }
     }, (error) => fail(error));
   }

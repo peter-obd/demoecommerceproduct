@@ -1,10 +1,14 @@
 import 'package:demoecommerceproduct/controllers/basket_controller.dart';
+import 'package:demoecommerceproduct/models/stock_availability_model.dart';
 import 'package:demoecommerceproduct/screens/checkout_screen.dart';
 import 'package:demoecommerceproduct/screens/search_screen.dart';
+import 'package:demoecommerceproduct/screens/stock_availability_screen.dart';
+import 'package:demoecommerceproduct/services/apis_service.dart';
 import 'package:demoecommerceproduct/services/basket_service.dart';
 import 'package:demoecommerceproduct/values/colors.dart';
 import 'package:demoecommerceproduct/values/constants.dart';
 import 'package:demoecommerceproduct/values/responsive.dart';
+import 'package:demoecommerceproduct/widgets/loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
@@ -494,14 +498,7 @@ class _BasketPageState extends State<BasketPage> {
         ],
       ),
       child: ElevatedButton(
-        onPressed: () {
-          // Navigate to checkout screen
-          Get.to(() => CheckoutScreen(
-                items: controller.products,
-                subtotal: controller.total.value,
-                deliveryCharge: 0.0,
-              ));
-        },
+        onPressed: () => _handleCheckout(responsive),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
@@ -701,6 +698,115 @@ class _BasketPageState extends State<BasketPage> {
         ],
       ),
     );
+  }
+
+  void _handleCheckout(Responsive responsive) {
+    // Show loading
+    // controller.isLoading.value = true;
+    FullScreenLoader.show();
+    // Prepare stock check items from basket products
+    List<StockCheckItem> stockCheckItems = controller.products.map((product) {
+      return StockCheckItem(
+        productId: product.productId,
+        variantId: product.variantId,
+        quantity: product.quantity,
+      );
+    }).toList();
+
+    // Check stock availability
+    ApisService.checkStockAvailability(
+      stockCheckItems,
+      (stockResponse) {
+        // Hide loading
+        FullScreenLoader.hide();
+
+        if (stockResponse.allAvailable) {
+          // All products are available, proceed to checkout
+          _proceedToCheckout();
+        } else {
+          // Navigate to stock availability screen
+          Get.to(
+            () => StockAvailabilityScreen(
+              unavailableItems: stockResponse.unavailableItems,
+              basketProducts: controller.products,
+              subtotal: controller.total.value,
+              deliveryCharge: 0.0,
+              onContinue: (updatedProducts) async {
+                // Update basket with modified quantities or removed products
+                await _updateBasketProducts(updatedProducts);
+
+                // Refresh basket
+                controller.getCheckoutProducts();
+              },
+            ),
+          );
+        }
+      },
+      (error) {
+        // Hide loading
+        FullScreenLoader.hide();
+
+        // Show error message
+        Get.snackbar(
+          'Error',
+          error.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(20),
+        );
+      },
+    );
+  }
+
+  Future<void> _updateBasketProducts(
+      List<CheckoutProduct> updatedProducts) async {
+    // Get all current basket products
+    final currentProducts = controller.products;
+
+    // Find products that were removed (in current but not in updated)
+    for (var currentProduct in currentProducts) {
+      bool stillExists = updatedProducts.any(
+        (p) =>
+            p.productId == currentProduct.productId &&
+            p.variantId == currentProduct.variantId,
+      );
+
+      if (!stillExists) {
+        // Remove this product from basket
+        await BasketService.instance.removeFromBasket(
+          currentProduct.productId,
+          variantId: currentProduct.variantId,
+        );
+      }
+    }
+
+    // Update quantities for products that changed
+    for (var updatedProduct in updatedProducts) {
+      var currentProduct = currentProducts.firstWhereOrNull(
+        (p) =>
+            p.productId == updatedProduct.productId &&
+            p.variantId == updatedProduct.variantId,
+      );
+
+      if (currentProduct != null &&
+          currentProduct.quantity != updatedProduct.quantity) {
+        // Update quantity
+        await BasketService.instance.updateQuantity(
+          updatedProduct.productId,
+          updatedProduct.quantity,
+          variantId: updatedProduct.variantId,
+        );
+      }
+    }
+  }
+
+  void _proceedToCheckout() {
+    Get.to(() => CheckoutScreen(
+          items: controller.products,
+          subtotal: controller.total.value,
+          deliveryCharge: 0.0,
+        ));
   }
 }
 

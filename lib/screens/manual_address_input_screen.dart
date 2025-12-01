@@ -417,12 +417,17 @@ class _ManualAddressInputScreenState extends State<ManualAddressInputScreen> {
                               size: responsive.wp(40),
                             ),
                             SizedBox(width: responsive.wp(10)),
-                            Text(
-                              'Can\'t find your village? Add manually',
-                              style: AppTextStyle.textStyle(
-                                responsive.sp(30),
-                                AppColors.primary,
-                                FontWeight.w600,
+                            SizedBox(
+                              width: responsive.wp(150),
+                              child: Text(
+                                'Can\'t find your village? Add manually',
+                                maxLines: 4,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyle.textStyle(
+                                  responsive.sp(30),
+                                  AppColors.primary,
+                                  FontWeight.w600,
+                                ),
                               ),
                             ),
                           ],
