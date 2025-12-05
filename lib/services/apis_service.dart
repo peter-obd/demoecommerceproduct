@@ -31,7 +31,9 @@ typedef DistrictsSuccess = Function(List<District> districts);
 typedef StockAvailabilitySuccess = Function(StockAvailabilityResponse response);
 
 class ApisService {
-  static const String _baseUrl = "https://onedollarapp.onrender.com/";
+  static const String _baseUrl =
+      "https://api.theonedollarapp.com/"; // testing: "https://onedollarapp.onrender.com/";
+
   static const String _urlPath = "api/";
 
   static void getAllCategories(CategoriesSuccess success, RequestFail fail) {
@@ -623,10 +625,8 @@ class ApisService {
     }, (error) => fail(error));
   }
 
-  static void checkStockAvailability(
-      List<StockCheckItem> items,
-      StockAvailabilitySuccess success,
-      RequestFail fail) {
+  static void checkStockAvailability(List<StockCheckItem> items,
+      StockAvailabilitySuccess success, RequestFail fail) {
     var urlMethod = "Order/check-stock-availability";
     var url = _baseUrl + _urlPath + urlMethod;
     var params = items.map((item) => item.toJson()).toList();
